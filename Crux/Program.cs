@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Crux.Okcoin;
+using System;
 
 namespace Crux
 {
@@ -9,14 +10,14 @@ namespace Crux
             try
             {
                 QuickFix.SessionSettings settings = new QuickFix.SessionSettings("config/quickfix-client.cfg");
-                MarketMaker application = new MarketMaker();
+                OKCMarketAPI application = new OKCMarketAPI();
                 QuickFix.IMessageStoreFactory storeFactory = new QuickFix.FileStoreFactory(settings);
                 QuickFix.ILogFactory logFactory = new QuickFix.ScreenLogFactory(settings);
                 QuickFix.Transport.SocketInitiator initiator = new QuickFix.Transport.SocketInitiator(application, storeFactory, settings, logFactory);
                 initiator.Start();
                 Console.ReadKey();
                 initiator.Stop();
-
+                application.CurrentOrderBook.ExportLog("orderbook.log");
             }
             catch (Exception e)
             {

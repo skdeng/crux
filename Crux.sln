@@ -5,6 +5,10 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crux", "Crux\Crux.csproj", "{24A200FB-BB20-4138-867C-1570F7606133}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CruxUnitTest", "CruxTest\CruxUnitTest.csproj", "{BC007EE7-D9F6-4193-B48A-E67F969967DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackTest", "BackTest\BackTest.csproj", "{31076037-D4A2-4891-99AC-1129B7B35EA0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{24A200FB-BB20-4138-867C-1570F7606133}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24A200FB-BB20-4138-867C-1570F7606133}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24A200FB-BB20-4138-867C-1570F7606133}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC007EE7-D9F6-4193-B48A-E67F969967DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC007EE7-D9F6-4193-B48A-E67F969967DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC007EE7-D9F6-4193-B48A-E67F969967DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC007EE7-D9F6-4193-B48A-E67F969967DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31076037-D4A2-4891-99AC-1129B7B35EA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31076037-D4A2-4891-99AC-1129B7B35EA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31076037-D4A2-4891-99AC-1129B7B35EA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31076037-D4A2-4891-99AC-1129B7B35EA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

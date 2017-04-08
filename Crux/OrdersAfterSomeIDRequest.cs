@@ -1,12 +1,11 @@
 ﻿using QuickFix;
 using QuickFix.Fields;
 using System;
+
 namespace Crux
 {
     class OrdersAfterSomeIDRequest : Message
     {
-
-
         public static String MSGTYPE = "Z2000";
 
         public OrdersAfterSomeIDRequest()

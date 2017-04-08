@@ -1,46 +1,59 @@
 ﻿using QuickFix;
 using QuickFix.Fields;
 using System;
-namespace Crux
+
+namespace Crux.Okcoin
 {
     class OKTradingRequest
     {
         private static uint FreeID = 0x00000000;
         private static string GetFreeID { get { return FreeID++.ToString(); } }
-        private static readonly string OrderSymbol = "BTC/USD";
-        /**
-         * new Order request
-         * @throws IOException 
-         */
-        public static Message createOrderBookRequest(double vol, decimal price, char side)
+        private static readonly Symbol OrderSymbol = new Symbol("BTC/USD");
+
+        /// <summary>
+        /// Create FIX request for new limit order
+        /// </summary>
+        /// <param name="vol"></param>
+        /// <param name="price"></param>
+        /// <param name="side"></param>
+        /// <returns></returns>
+        public static Message createNewOrderRequest(double vol, double price, char side)
         {
 
             QuickFix.FIX44.NewOrderSingle newOrderSingleRequest = new QuickFix.FIX44.NewOrderSingle();
-            newOrderSingleRequest.Set(new Account(AccountUtil.apiKey + "," + AccountUtil.sercretKey));
+            newOrderSingleRequest.Set(new Account(AccountUtil.APIKey + "," + AccountUtil.SecretKey));
             newOrderSingleRequest.Set(new ClOrdID(GetFreeID));
             newOrderSingleRequest.Set(new OrderQty(new decimal(vol)));
             newOrderSingleRequest.Set(new OrdType(OrdType.LIMIT));
-            newOrderSingleRequest.Set(new Price(price));
+            newOrderSingleRequest.Set(new Price(new decimal(price)));
             newOrderSingleRequest.Set(new Side(side));
-            newOrderSingleRequest.Set(new Symbol(OrderSymbol));
+            newOrderSingleRequest.Set(OrderSymbol);
             newOrderSingleRequest.Set(new TransactTime(DateTime.Now));
+            Log.Write($"Placed {(side.Equals(Side.BUY) ? "BUY" : "SELL")} order", 1);
             return newOrderSingleRequest;
         }
 
-        /**
-         * 取消订单请求
-         */
+        /// <summary>
+        /// Create request for order cancellation
+        /// </summary>
+        /// <param name="order"></param>
+        /// <returns></returns>
         public static Message createOrderCancelRequest(Order order)
         {
             QuickFix.FIX44.OrderCancelRequest OrderCancelRequest = new QuickFix.FIX44.OrderCancelRequest();
             OrderCancelRequest.Set(new ClOrdID(GetFreeID));
-            OrderCancelRequest.Set(new OrigClOrdID(order.ClientOrderID));
+            OrderCancelRequest.Set(new OrigClOrdID(order.ClientOrderID.ToString()));
             OrderCancelRequest.Set(new Side(order.Side));
-            OrderCancelRequest.Set(new Symbol(OrderSymbol));
+            OrderCancelRequest.Set(OrderSymbol);
             OrderCancelRequest.Set(new TransactTime(DateTime.Now));
             return OrderCancelRequest;
         }
 
+        /// <summary>
+        /// Create request for order status
+        /// </summary>
+        /// <param name="order">Request information for a given order, if null, request information for all orders</param>
+        /// <returns></returns>
         public static Message createOrderMassStatusRequest(Order order = null)
         {
             QuickFix.FIX44.OrderMassStatusRequest orderMassStatusRequest = new QuickFix.FIX44.OrderMassStatusRequest();
@@ -52,50 +65,42 @@ namespace Crux
             else
             {
                 orderMassStatusRequest.Set(new MassStatusReqType(MassStatusReqType.STATUS_FOR_ORDERS_FOR_A_SECURITY));
-                orderMassStatusRequest.Set(new MassStatusReqID(order.ClientOrderID));
+                orderMassStatusRequest.Set(new MassStatusReqID(order.ClientOrderID.ToString()));
             }
             return orderMassStatusRequest;
         }
 
-        /**
-         * 订单状态请求
-         */
-        public static Message createOrderStatusRequest()
-        {
-            QuickFix.FIX44.OrderMassStatusRequest orderMassStatusRequest = new QuickFix.FIX44.OrderMassStatusRequest();
-            orderMassStatusRequest.Set(new MassStatusReqID("2123413"));//查询的订单ID
-            orderMassStatusRequest.Set(new MassStatusReqType(MassStatusReqType.STATUS_FOR_ALL_ORDERS));
-            return orderMassStatusRequest;
-        }
-
-        /**
-         * 账户信息请求 
-         */
+        /// <summary>
+        /// Create request for user account information
+        /// </summary>
+        /// <returns></returns>
         public static Message createUserAccountRequest()
         {
             AccountInfoRequest accountInfoRequest = new AccountInfoRequest();
-            accountInfoRequest.set(new Account(AccountUtil.apiKey + "," + AccountUtil.sercretKey));//这里可以设置可以省略
+            accountInfoRequest.set(AccountUtil.Account);
             accountInfoRequest.set(new AccReqID("123"));
             return accountInfoRequest;
         }
 
-        /**
-         * 请求历史交易
-         */
+        /// <summary>
+        /// Create request for trade history
+        /// </summary>
+        /// <returns></returns>
         public static Message createTradeHistoryRequest()
         {
             QuickFix.FIX44.TradeCaptureReportRequest tradeCaptureReportRequest = new QuickFix.FIX44.TradeCaptureReportRequest();
-            tradeCaptureReportRequest.Set(new Symbol("BTC/CNY"));
+            tradeCaptureReportRequest.Set(OrderSymbol);
             tradeCaptureReportRequest.Set(new TradeRequestID("order_id"));
-            tradeCaptureReportRequest.Set(new TradeRequestType(1));//这里必须是1
+            tradeCaptureReportRequest.Set(new TradeRequestType(1)); // must be 1
             return tradeCaptureReportRequest;
         }
+
 
         public static Message createTradeOrdersBySomeID()
         {
             OrdersAfterSomeIDRequest request = new OrdersAfterSomeIDRequest();
             request.set(new OrderID("1"));
-            request.set(new Symbol("BTC/USD"));
+            request.set(OrderSymbol);
             request.set(new OrdStatus('1'));
             request.set(new TradeRequestID("liushuihao_001"));
             //		request.Set(new TradeRequestType(1));

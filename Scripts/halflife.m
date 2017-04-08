@@ -1,0 +1,11 @@
+function hl = halflife (file)
+    file = fopen(file);
+    output = textscan(file, '%s%f', 'delimiter', ',');
+    y = output(2);
+    y = y{1,1};
+    ylag = lag(y,1);
+    deltaY = y-ylag;
+    deltaY(1) = [];
+    ylag(1) = [];
+    reg = ols(deltaY, [ylag ones(size(ylag))]);
+    hl = -log(2)/reg.beta(1);

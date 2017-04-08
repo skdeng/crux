@@ -1,14 +1,14 @@
 ﻿using QuickFix;
 using QuickFix.Fields;
 
-namespace Crux
+namespace Crux.Okcoin
 {
     class OKFutureRequest
     {
         public static Message createOrderBookRequest(decimal price, char side, bool open)
         {
             QuickFix.FIX44.NewOrderSingle newOrderSingleRequest = new QuickFix.FIX44.NewOrderSingle();
-            newOrderSingleRequest.Set(AccountUtil.account);
+            newOrderSingleRequest.Set(AccountUtil.Account);
             newOrderSingleRequest.Set(new ClOrdID("111"));
             newOrderSingleRequest.Set(new OrderQty(1));
             newOrderSingleRequest.Set(new OrdType('2'));

@@ -1,11 +1,15 @@
-﻿namespace Crux
+﻿using System;
+
+namespace Crux
 {
-    class Order
+    public class Order
     {
-        public string ClientOrderID { get; set; }
-        public string OrderID { get; set; }
-        public float Price { get; set; }
+        public int ClientOrderID { get; set; }
+        public int OrderID { get; set; }
+        public double Price { get; set; }
         public char Side { get; set; }
-        public float Vol { get; set; }
+        public double Vol { get; set; }
+        public char OrderType { get; set; }
+        public DateTime Time { get; set; }
     }
 }
