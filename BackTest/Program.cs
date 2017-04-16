@@ -9,18 +9,17 @@ namespace BackTest
     {
         static void Main(string[] args)
         {
-            HistoricalDataAPI historicalAPI = new HistoricalDataAPI("../../../data/eth_hourly.csv", 100, 1);
-            TradeStrategy meanReversal = new MeanReversalStrategy(historicalAPI, 0, 24);
+            HistoricalDataAPI historicalAPI = new HistoricalDataAPI("../../../data/polo_LTC_USD1hour.csv", 100, 1, 0.005);
+            TradeStrategy meanReversal = new MeanReversalStrategy(historicalAPI, 0, 72);
             meanReversal.Start(false);
-            Benchmark strategyBenchmark = new Benchmark();
-            strategyBenchmark.PL = meanReversal.PL;
-            strategyBenchmark.Prices = historicalAPI.HistoricalPrices;
 
-            double cumulativePL = meanReversal.PortfolioValue / meanReversal.StartingPortfolioValue;
             double assetPL = historicalAPI.HistoricalPrices.Last() / historicalAPI.HistoricalPrices.First();
-            Console.WriteLine($"Sharpe ratio: {strategyBenchmark.SharpeRatio(8760)}");
-            Console.WriteLine($"Cumulative PL: {cumulativePL}");
-            Console.WriteLine($"Asset PL: {assetPL}");
+            Log.Write($"Sharpe ratio: {Benchmark.SharpeRatio(8760, meanReversal.PL, historicalAPI.HistoricalPrices)}", 1);
+            Log.Write($"Cumulative PL: {meanReversal.CumulativePL}", 1);
+            Log.Write($"Asset PL: {assetPL}", 1);
+
+            Log.Write($"PL avg: {meanReversal.PL.Average()}", 2);
+            Log.Write($"PL max: {meanReversal.PL.Max()} | PL min: {meanReversal.PL.Min()}", 2);
             Console.ReadKey();
         }
     }

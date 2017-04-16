@@ -8,7 +8,7 @@ namespace Crux.Okcoin
     {
         private static uint FreeID = 0x00000000;
         private static string GetFreeID { get { return FreeID++.ToString(); } }
-        private static readonly Symbol OrderSymbol = new Symbol("BTC/USD");
+        public static Symbol TradeSymbol = new Symbol("BTC/USD");
 
         /// <summary>
         /// Create FIX request for new limit order
@@ -17,19 +17,18 @@ namespace Crux.Okcoin
         /// <param name="price"></param>
         /// <param name="side"></param>
         /// <returns></returns>
-        public static Message createNewOrderRequest(double vol, double price, char side)
+        public static Message CreateNewOrderRequest(double vol, double price, char side, char type)
         {
 
             QuickFix.FIX44.NewOrderSingle newOrderSingleRequest = new QuickFix.FIX44.NewOrderSingle();
             newOrderSingleRequest.Set(new Account(AccountUtil.APIKey + "," + AccountUtil.SecretKey));
             newOrderSingleRequest.Set(new ClOrdID(GetFreeID));
             newOrderSingleRequest.Set(new OrderQty(new decimal(vol)));
-            newOrderSingleRequest.Set(new OrdType(OrdType.LIMIT));
+            newOrderSingleRequest.Set(new OrdType(type));
             newOrderSingleRequest.Set(new Price(new decimal(price)));
             newOrderSingleRequest.Set(new Side(side));
-            newOrderSingleRequest.Set(OrderSymbol);
+            newOrderSingleRequest.Set(TradeSymbol);
             newOrderSingleRequest.Set(new TransactTime(DateTime.Now));
-            Log.Write($"Placed {(side.Equals(Side.BUY) ? "BUY" : "SELL")} order", 1);
             return newOrderSingleRequest;
         }
 
@@ -38,13 +37,13 @@ namespace Crux.Okcoin
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public static Message createOrderCancelRequest(Order order)
+        public static Message CreateOrderCancelRequest(Order order)
         {
             QuickFix.FIX44.OrderCancelRequest OrderCancelRequest = new QuickFix.FIX44.OrderCancelRequest();
             OrderCancelRequest.Set(new ClOrdID(GetFreeID));
             OrderCancelRequest.Set(new OrigClOrdID(order.ClientOrderID.ToString()));
             OrderCancelRequest.Set(new Side(order.Side));
-            OrderCancelRequest.Set(OrderSymbol);
+            OrderCancelRequest.Set(TradeSymbol);
             OrderCancelRequest.Set(new TransactTime(DateTime.Now));
             return OrderCancelRequest;
         }
@@ -54,7 +53,7 @@ namespace Crux.Okcoin
         /// </summary>
         /// <param name="order">Request information for a given order, if null, request information for all orders</param>
         /// <returns></returns>
-        public static Message createOrderMassStatusRequest(Order order = null)
+        public static Message CreateOrderMassStatusRequest(Order order = null)
         {
             QuickFix.FIX44.OrderMassStatusRequest orderMassStatusRequest = new QuickFix.FIX44.OrderMassStatusRequest();
             if (order == null)
@@ -74,7 +73,7 @@ namespace Crux.Okcoin
         /// Create request for user account information
         /// </summary>
         /// <returns></returns>
-        public static Message createUserAccountRequest()
+        public static Message CreateUserAccountRequest()
         {
             AccountInfoRequest accountInfoRequest = new AccountInfoRequest();
             accountInfoRequest.set(AccountUtil.Account);
@@ -86,21 +85,21 @@ namespace Crux.Okcoin
         /// Create request for trade history
         /// </summary>
         /// <returns></returns>
-        public static Message createTradeHistoryRequest()
+        public static Message CreateTradeHistoryRequest()
         {
             QuickFix.FIX44.TradeCaptureReportRequest tradeCaptureReportRequest = new QuickFix.FIX44.TradeCaptureReportRequest();
-            tradeCaptureReportRequest.Set(OrderSymbol);
+            tradeCaptureReportRequest.Set(TradeSymbol);
             tradeCaptureReportRequest.Set(new TradeRequestID("order_id"));
             tradeCaptureReportRequest.Set(new TradeRequestType(1)); // must be 1
             return tradeCaptureReportRequest;
         }
 
 
-        public static Message createTradeOrdersBySomeID()
+        public static Message CreateTradeOrdersBySomeID()
         {
             OrdersAfterSomeIDRequest request = new OrdersAfterSomeIDRequest();
             request.set(new OrderID("1"));
-            request.set(OrderSymbol);
+            request.set(TradeSymbol);
             request.set(new OrdStatus('1'));
             request.set(new TradeRequestID("liushuihao_001"));
             //		request.Set(new TradeRequestType(1));

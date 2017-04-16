@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Crux.Okcoin
 {
-    class OKCMarketAPI : MessageCracker, IApplication
+    class OKCMarketAPI : MessageCracker, IApplication, MarketAPI
     {
         private Session CurrentSession;
 
@@ -14,9 +14,91 @@ namespace Crux.Okcoin
 
         private double BalanceBTC;
 
+        private double BalanceLTC;
+
         private double BalanceUSD;
 
-        public OrderBook CurrentOrderBook = new OrderBook();
+        private OrderBook CurrentOrderBook = new OrderBook();
+
+        private Symbol TradeSymbol;
+
+        private Trade LastTrade;
+
+        private bool TrackOrderBook;
+        private bool TrackLiveTrade;
+
+        public OKCMarketAPI(string keyfile, string symbol, bool orderbook, bool livetrade)
+        {
+            AccountUtil.ReadKeyFile(keyfile);
+            TradeSymbol = new Symbol(symbol);
+            OKTradingRequest.TradeSymbol = TradeSymbol;
+            OKMarketDataRequest.TradeSymbol = TradeSymbol;
+
+            LastTrade = null;
+            TrackOrderBook = orderbook;
+            TrackLiveTrade = livetrade;
+        }
+
+        public void CancelAllOrders()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CancelOrder(Order order)
+        {
+            var request = OKTradingRequest.CreateOrderCancelRequest(order);
+            CurrentSession.Send(request);
+        }
+
+        public List<Order> GetActiveOrders()
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GetBalanceFiat()
+        {
+            return BalanceUSD;
+        }
+
+        public double GetBalanceSecurity()
+        {
+            var symbol = TradeSymbol.getValue();
+            if (symbol.Contains("BTC"))
+            {
+                return BalanceBTC;
+            }
+            else if (symbol.Contains("LTC"))
+            {
+                return BalanceLTC;
+            }
+            else
+            {
+                Log.Write($"Broken symbol: {symbol}", 0);
+                return 0;
+            }
+        }
+
+        public double GetLastPrice()
+        {
+            return LastTrade == null ? 0 : LastTrade.Price;
+        }
+
+        public OrderBook GetOrderBook()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Order SubmitOrder(double price, double volume, char side, char type)
+        {
+            var request = OKTradingRequest.CreateNewOrderRequest(volume, price, side, type);
+            CurrentSession.Send(request);
+            return null;
+        }
+
+        public bool Tick()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Initial market data snapshot
@@ -28,8 +110,24 @@ namespace Crux.Okcoin
             var numMDEntries = msg.GetInt(Tags.NoMDEntries);
             for (int i = 1; i <= numMDEntries; i++)
             {
-                var order = msg.GetGroup(i, Tags.NoMDEntries);
-                CurrentOrderBook.AddOrder((double)order.GetDecimal(Tags.MDEntryPx), (double)order.GetDecimal(Tags.MDEntrySize), order.GetChar(Tags.MDEntryType));
+                var entry = msg.GetGroup(i, Tags.NoMDEntries);
+                var entryType = entry.GetChar(Tags.MDEntryType);
+                if (entryType.Equals(MDEntryType.BID) || entryType.Equals(MDEntryType.OFFER))
+                {
+                    CurrentOrderBook.AddOrder((double)entry.GetDecimal(Tags.MDEntryPx), (double)entry.GetDecimal(Tags.MDEntrySize), entry.GetChar(Tags.MDEntryType));
+                }
+                else if (entryType.Equals(MDEntryType.TRADE))
+                {
+                    LastTrade = new Trade()
+                    {
+                        Price = (double)entry.GetDecimal(Tags.MDEntryPx),
+                        Volume = (double)entry.GetDecimal(Tags.MDEntrySize)
+                    };
+                }
+                else
+                {
+                    Log.Write($"Unknown entry type {entryType}", 0);
+                }
             }
         }
 
@@ -43,22 +141,33 @@ namespace Crux.Okcoin
             var numMDEntries = msg.GetInt(Tags.NoMDEntries);
             for (int i = 1; i <= numMDEntries; i++)
             {
-                var order = msg.GetGroup(i, Tags.NoMDEntries);
-                var action = order.GetChar(Tags.MDUpdateAction);
-                switch (action)
+                var entry = msg.GetGroup(i, Tags.NoMDEntries);
+                var entryType = entry.GetChar(Tags.MDEntryType);
+                if (entryType.Equals(MDEntryType.BID) || entryType.Equals(MDEntryType.OFFER))
                 {
-                    case MDUpdateAction.CHANGE:
-                        CurrentOrderBook.ChangeOrder((double)order.GetDecimal(Tags.MDEntryPx), (double)order.GetDecimal(Tags.MDEntrySize), order.GetChar(Tags.MDEntryType));
-                        break;
-                    case MDUpdateAction.DELETE:
-                        CurrentOrderBook.RemoveOrder((double)order.GetDecimal(Tags.MDEntryPx), order.GetChar(Tags.MDEntryType), (double)order.GetDecimal(Tags.MDEntrySize));
-                        break;
-                    default:
-                        Log.Write($"Unknown market data update action {action}", 0);
-                        break;
+                    var action = entry.GetChar(Tags.MDUpdateAction);
+                    switch (action)
+                    {
+                        case MDUpdateAction.CHANGE:
+                            CurrentOrderBook.ChangeOrder((double)entry.GetDecimal(Tags.MDEntryPx), (double)entry.GetDecimal(Tags.MDEntrySize), entry.GetChar(Tags.MDEntryType));
+                            break;
+                        case MDUpdateAction.DELETE:
+                            CurrentOrderBook.RemoveOrder((double)entry.GetDecimal(Tags.MDEntryPx), entry.GetChar(Tags.MDEntryType), (double)entry.GetDecimal(Tags.MDEntrySize));
+                            break;
+                        default:
+                            Log.Write($"Unknown market data update action {action}", 0);
+                            break;
+                    }
+                }
+                else if (entryType.Equals(MDEntryType.TRADE))
+                {
+                    LastTrade = new Trade()
+                    {
+                        Price = (double)entry.GetDecimal(Tags.MDEntryPx),
+                        Volume = (double)entry.GetDecimal(Tags.MDEntrySize)
+                    };
                 }
             }
-            Console.Title = $"Project Crux Bid: {CurrentOrderBook.BestBid.Price} Ask: {CurrentOrderBook.BestOffer.Price} NumBids: {CurrentOrderBook.NumBids} NumAsks: {CurrentOrderBook.NumOffers}";
         }
 
         public void OnMessage(QuickFix.FIX44.MarketDataRequestReject msg, SessionID sessionID)
@@ -139,7 +248,7 @@ namespace Crux.Okcoin
                             case 1:
                                 // partial fill
                                 int remainingQty = msg.GetInt(Tags.LeavesQty);
-                                CurrentOrders.First(o => o.ClientOrderID == clientOrderID).Vol = remainingQty;
+                                CurrentOrders.First(o => o.ClientOrderID == clientOrderID).Volume = remainingQty;
                                 break;
                             case 2:
                                 // full fill
@@ -161,8 +270,9 @@ namespace Crux.Okcoin
         /// <param name="sessionID"></param>
         public void OnAccountInfoResponse(Message msg, SessionID sessionID)
         {
-            BalanceBTC = double.Parse(msg.GetString(8101));
-            BalanceUSD = double.Parse(msg.GetString(8103));
+            BalanceBTC = (double)msg.GetDecimal(8101);
+            BalanceLTC = (double)msg.GetDecimal(8102);
+            BalanceUSD = (double)msg.GetDecimal(8103);
         }
 
         public void OnExchangeErrorMessage(Message msg, SessionID sessionID)
@@ -225,11 +335,22 @@ namespace Crux.Okcoin
         {
             Log.Write("===== Client logon =====", 3);
 
-            CurrentSession = Session.LookupSession(sessionID);
-            CurrentSession.Send(OKMarketDataRequest.createOrderBookRequest(10));
+            while (CurrentSession == null)
+            {
+                CurrentSession = Session.LookupSession(sessionID);
+            }
+
+            if (TrackOrderBook)
+            {
+                CurrentSession.Send(OKMarketDataRequest.CreateOrderBookRequest(10));
+            }
+            if (TrackLiveTrade)
+            {
+                CurrentSession.Send(OKMarketDataRequest.CreateLiveTradesRequest());
+            }
 
             // Fetch user info
-            CurrentSession.Send(OKTradingRequest.createUserAccountRequest());
+            CurrentSession.Send(OKTradingRequest.CreateUserAccountRequest());
         }
 
         /// <summary>
@@ -263,6 +384,5 @@ namespace Crux.Okcoin
             Log.Write("===== Application Message Sent =====", 3);
             Log.Write($"{sessionID} : {msg.ToString()}", 3);
         }
-
     }
 }

@@ -8,9 +8,9 @@ namespace Crux.Okcoin
         private static uint FreeID = 0x00000000;
         private static string GetFreeID { get { return FreeID++.ToString(); } }
 
-        private static readonly Symbol TradeSymbol = new Symbol("BTC/USD");
+        public static Symbol TradeSymbol = new Symbol("BTC/USD");
 
-        public static Message createOrderBookRequest(int depth = 0)
+        public static Message CreateOrderBookRequest(int depth = 0)
         {
             QuickFix.FIX44.MarketDataRequest orderBookRequest = new QuickFix.FIX44.MarketDataRequest();
             QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup noRelatedSym = new QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup();
@@ -33,7 +33,7 @@ namespace Crux.Okcoin
             return orderBookRequest;
         }
 
-        public static Message createLiveTradesRequest()
+        public static Message CreateLiveTradesRequest()
         {
             QuickFix.FIX44.MarketDataRequest liveTradesRequest = new QuickFix.FIX44.MarketDataRequest();
             QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup noRelatedSym = new QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup();
@@ -42,6 +42,7 @@ namespace Crux.Okcoin
             liveTradesRequest.AddGroup(noRelatedSym);
             liveTradesRequest.Set(new MDReqID(GetFreeID));
             liveTradesRequest.Set(new SubscriptionRequestType(SubscriptionRequestType.SNAPSHOT_PLUS_UPDATES));
+            liveTradesRequest.Set(new MDUpdateType(MDUpdateType.INCREMENTAL_REFRESH));
             liveTradesRequest.Set(new MarketDepth(0));
             QuickFix.FIX44.MarketDataRequest.NoMDEntryTypesGroup group = new QuickFix.FIX44.MarketDataRequest.NoMDEntryTypesGroup();
             group.Set(new MDEntryType(MDEntryType.TRADE));
@@ -49,7 +50,7 @@ namespace Crux.Okcoin
             return liveTradesRequest;
         }
 
-        public static Message create24HTickerRequest()
+        public static Message Create24HTickerRequest()
         {
             QuickFix.FIX44.MarketDataRequest tickerRequest = new QuickFix.FIX44.MarketDataRequest();
             QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup noRelatedSym = new QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup();

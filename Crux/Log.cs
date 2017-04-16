@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Crux
 {
-    class Log
+    public class Log
     {
         /// <summary>
         /// Log level
@@ -13,36 +15,64 @@ namespace Crux
         /// </summary>
         public static int LogLevel = 3;
 
-        public static void Write(string msg, int level)
+        private static string _LogExportFile;
+        public static string LogExportFile
         {
-            if (level <= LogLevel)
+            get { return _LogExportFile; }
+            set
             {
-                switch (level)
+                _LogExportFile = value;
+                if (FileWriter == null)
                 {
-                    case 0:
-                        {
-                            var prevColor = Console.ForegroundColor;
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(msg);
-                            Console.ForegroundColor = prevColor;
-                            break;
-                        }
-                    case 1:
-                        {
-                            var prevColor = Console.ForegroundColor;
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine(msg);
-                            Console.ForegroundColor = prevColor;
-                            break;
-                        }
-                    case 2:
-                    case 3:
-                        {
-                            Console.WriteLine(msg);
-                            break;
-                        }
+                    FileWriter = File.AppendText(_LogExportFile);
+                    FileWriter.AutoFlush = true;
                 }
             }
+        }
+
+        private static StreamWriter FileWriter = null;
+
+        public static void CloseLogFile()
+        {
+            FileWriter.Close();
+        }
+
+        public static void Write(string msg, int level)
+        {
+            Task.Run(() =>
+            {
+                if (level <= LogLevel)
+                {
+                    switch (level)
+                    {
+                        case 0:
+                            {
+                                var prevColor = Console.ForegroundColor;
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine(msg);
+                                Console.ForegroundColor = prevColor;
+                                break;
+                            }
+                        case 1:
+                            {
+                                var prevColor = Console.ForegroundColor;
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine(msg);
+                                Console.ForegroundColor = prevColor;
+                                break;
+                            }
+                        case 2:
+                        case 3:
+                            {
+                                Console.WriteLine(msg);
+                                break;
+                            }
+                    }
+
+                    FileWriter?.WriteLine($"[{level}] {msg}");
+                    FileWriter?.Flush();
+                }
+            });
         }
     }
 }

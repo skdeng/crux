@@ -6,7 +6,7 @@ namespace Crux
     {
         void CancelAllOrders();
 
-        void CancelOrder(int orderID);
+        void CancelOrder(Order order);
 
         List<Order> GetActiveOrders();
 
@@ -18,7 +18,7 @@ namespace Crux
 
         OrderBook GetOrderBook();
 
-        int SubmitOrder(double price, double volume, char side, char type);
+        Order SubmitOrder(double price, double volume, char side, char type);
 
         bool Tick();
     }

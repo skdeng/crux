@@ -1,5 +1,5 @@
 ﻿using QuickFix;
-namespace Crux
+namespace Crux.Okcoin
 {
     class AccountInfoRequest : Message
     {

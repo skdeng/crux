@@ -7,6 +7,8 @@ namespace Crux
     {
         public readonly List<double> PL;
 
+        public double CumulativePL { get { return PortfolioValue / StartingPortfolioValue; } }
+
         protected int CurrentTick;
 
         public double StartingPortfolioValue;

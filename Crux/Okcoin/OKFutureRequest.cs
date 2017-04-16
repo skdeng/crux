@@ -5,7 +5,7 @@ namespace Crux.Okcoin
 {
     class OKFutureRequest
     {
-        public static Message createOrderBookRequest(decimal price, char side, bool open)
+        public static Message CreateOrderBookRequest(decimal price, char side, bool open)
         {
             QuickFix.FIX44.NewOrderSingle newOrderSingleRequest = new QuickFix.FIX44.NewOrderSingle();
             newOrderSingleRequest.Set(AccountUtil.Account);
@@ -23,7 +23,7 @@ namespace Crux.Okcoin
             return newOrderSingleRequest;
         }
 
-        public static Message createOrderCancelRequest(int orderID)
+        public static Message CreateOrderCancelRequest(int orderID)
         {
             QuickFix.FIX44.OrderCancelRequest orderCancelRequest = new QuickFix.FIX44.OrderCancelRequest();
             orderCancelRequest.Set(new ClOrdID("123"));
@@ -39,12 +39,12 @@ namespace Crux.Okcoin
             return futureLiveDataRequest;
         }
 
-        public static Message createSubLivePositionDataRequest()
+        public static Message CreateSubLivePositionDataRequest()
         {
             return createFutureLiveDataRequest("P");
         }
 
-        public static Message createSubLiveOrderDataRequest()
+        public static Message CreateSubLiveOrderDataRequest()
         {
             return createFutureLiveDataRequest("O");
         }

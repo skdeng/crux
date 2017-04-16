@@ -15,22 +15,26 @@ namespace BackTest
 
         private List<Order> CurrentOrders;
 
-        private double BalanceUSD;
+        private double BalanceFiat;
 
-        private double BalanceBTC;
+        private double BalanceSecurity;
+
+        private double TransactionCost;
 
         private static int FreeID = 0x00000000;
         private static int GetFreeID { get { return FreeID++; } }
 
         private Mutex OrderLock { get; set; }
 
-        public HistoricalDataAPI(string historicalDataFile, double startingUSD, double startingBTC)
+        public HistoricalDataAPI(string historicalDataFile, double startingUSD, double startingBTC, double transactionCost)
         {
             HistoricalPrices = new List<double>();
             CurrentTick = 0;
             CurrentOrders = new List<Order>();
-            BalanceUSD = startingUSD;
-            BalanceBTC = startingBTC;
+            BalanceFiat = startingUSD;
+            BalanceSecurity = startingBTC;
+            TransactionCost = transactionCost;
+
             ReadDateFile(historicalDataFile);
             OrderLock = new Mutex();
         }
@@ -40,10 +44,10 @@ namespace BackTest
             CurrentOrders.RemoveRange(0, CurrentOrders.Count);
         }
 
-        public void CancelOrder(int orderID)
+        public void CancelOrder(Order order)
         {
             OrderLock.WaitOne();
-            CurrentOrders.RemoveAll(o => o.OrderID == orderID);
+            CurrentOrders.RemoveAll(o => o.ClientOrderID == order.ClientOrderID || o.OrderID == order.OrderID);
             OrderLock.ReleaseMutex();
         }
 
@@ -54,12 +58,12 @@ namespace BackTest
 
         public double GetBalanceFiat()
         {
-            return BalanceUSD;
+            return BalanceFiat;
         }
 
         public double GetBalanceSecurity()
         {
-            return BalanceBTC;
+            return BalanceSecurity;
         }
 
         public double GetLastPrice()
@@ -72,20 +76,20 @@ namespace BackTest
             return null;
         }
 
-        public int SubmitOrder(double price, double volume, char side, char type)
+        public Order SubmitOrder(double price, double volume, char side, char type)
         {
             switch (side)
             {
                 case Side.BUY:
-                    if (price * volume > BalanceUSD)
+                    if (price * volume > BalanceFiat)
                     {
-                        return -1;
+                        return null;
                     }
                     break;
                 case Side.SELL:
-                    if (volume > BalanceBTC)
+                    if (volume > BalanceSecurity)
                     {
-                        return -1;
+                        return null;
                     }
                     break;
                 default:
@@ -95,15 +99,15 @@ namespace BackTest
             if (type.Equals(OrdType.MARKET))
             {
                 ExecuteOrder(volume, side);
-                return 0;
+                return new Order() { Price = price, Volume = volume, Side = side, OrderType = type, OrderID = GetFreeID };
             }
-            var newOrder = new Order() { Price = price, Vol = volume, Side = side, OrderType = type, OrderID = GetFreeID };
+            var newOrder = new Order() { Price = price, Volume = volume, Side = side, OrderType = type, OrderID = GetFreeID };
 
             OrderLock.WaitOne();
             CurrentOrders.Add(newOrder);
             OrderLock.ReleaseMutex();
 
-            return newOrder.OrderID;
+            return newOrder;
         }
 
         public void StartTick()
@@ -125,13 +129,13 @@ namespace BackTest
                     case Side.BUY:
                         if (order.Price >= HistoricalPrices[CurrentTick])
                         {
-                            ExecuteOrder(order.Vol, order.Side);
+                            ExecuteOrder(order.Volume, order.Side);
                         }
                         break;
                     case Side.SELL:
                         if (order.Price <= HistoricalPrices[CurrentTick])
                         {
-                            ExecuteOrder(order.Vol, order.Side);
+                            ExecuteOrder(order.Volume, order.Side);
                         }
                         break;
                     default:
@@ -158,12 +162,12 @@ namespace BackTest
             switch (side)
             {
                 case Side.BUY:
-                    BalanceUSD -= price * volume;
-                    BalanceBTC += volume;
+                    BalanceFiat -= price * volume;
+                    BalanceSecurity += volume * (1 - TransactionCost);
                     break;
                 case Side.SELL:
-                    BalanceUSD += price * volume;
-                    BalanceBTC -= volume;
+                    BalanceFiat += price * volume * (1 - TransactionCost);
+                    BalanceSecurity -= volume;
                     break;
                 default:
                     break;

@@ -1,5 +1,4 @@
 ﻿using QuickFix.Fields;
-using System.IO;
 using System.Threading;
 
 namespace Crux
@@ -20,11 +19,8 @@ namespace Crux
 
         public BookOrder GetBook(char side) { return side.Equals(MDEntryType.BID) ? BestBid : BestOffer; }
 
-        public string OrderBookLog = "";
-
         public void AddOrder(double price, double vol, char side)
         {
-            OrderBookLog += $"ADD | {(side.Equals(MDEntryType.BID) ? "BID" : "OFFER")} | {price} | {vol}\n";
             if (side.Equals(MDEntryType.BID))
             {
                 BidLock.WaitOne();
@@ -98,7 +94,6 @@ namespace Crux
             {
                 return;
             }
-            OrderBookLog += $"REMOVE | {(side.Equals(MDEntryType.BID) ? "BID" : "OFFER")} | {price} | {vol}\n";
             if (side.Equals(MDEntryType.BID))
             {
                 BidLock.WaitOne();
@@ -119,7 +114,6 @@ namespace Crux
                     for (current = BestBid; current != null && current.Price > price; prev = current, current = current.Next) ;
                     if (current == null || current.Price != price)
                     {
-                        OrderBookLog += $"ERROR REMOVE | {(side.Equals(MDEntryType.BID) ? "BID" : "OFFER")} | {price} \n";
                         Log.Write("Error: Trying to remove inexistant book order", 0);
                         BidLock.ReleaseMutex();
                         return;
@@ -150,7 +144,6 @@ namespace Crux
                     for (current = BestOffer; current != null && current.Price < price; prev = current, current = current.Next) ;
                     if (current == null || current.Price != price)
                     {
-                        OrderBookLog += $"ERROR REMOVE | {(side.Equals(MDEntryType.BID) ? "BID" : "OFFER")} | {price} \n";
                         Log.Write("Error: Trying to remove inexistant book order", 0);
                         //OfferLock.ReleaseMutex();
                         return;
@@ -170,7 +163,6 @@ namespace Crux
 
         public void ChangeOrder(double price, double vol, char side)
         {
-            OrderBookLog += $"CHANGE | {(side.Equals(MDEntryType.BID) ? "BID" : "OFFER")} | {price} | {vol}\n";
             BookOrder current = null;
             BookOrder prev = null;
             Mutex currentLock = null;
@@ -233,11 +225,6 @@ namespace Crux
                 }
             }
             return cumulativeVol;
-        }
-
-        public void ExportLog(string filename)
-        {
-            File.WriteAllText(filename, OrderBookLog);
         }
     }
 
