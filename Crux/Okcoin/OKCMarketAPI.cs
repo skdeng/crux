@@ -1,8 +1,11 @@
-﻿using QuickFix;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using QuickFix;
 using QuickFix.Fields;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Crux.Okcoin
 {
@@ -20,6 +23,7 @@ namespace Crux.Okcoin
 
         private OrderBook CurrentOrderBook = new OrderBook();
 
+        private string TradeSymbolString;
         private Symbol TradeSymbol;
 
         private Trade LastTrade;
@@ -27,9 +31,26 @@ namespace Crux.Okcoin
         private bool TrackOrderBook;
         private bool TrackLiveTrade;
 
-        public OKCMarketAPI(string keyfile, string symbol, bool orderbook, bool livetrade)
+        private QuickFix.Transport.SocketInitiator Initiator;
+
+        private MarketAPIReadyCallback ReadyCallback;
+        private OperationCallback OrderCancelCallback;
+        private OperationCallback OrderSubmitCallback;
+
+        public OKCMarketAPI(string keyfile, string symbol, bool orderbook, bool livetrade, MarketAPIReadyCallback callback = null)
         {
+            SessionSettings settings = new SessionSettings("config/quickfix-client.cfg");
+            IMessageStoreFactory storeFactory = new FileStoreFactory(settings);
+            ILogFactory logFactory = new ScreenLogFactory(settings);
+            Initiator = new QuickFix.Transport.SocketInitiator(this, storeFactory, settings, logFactory);
+            Initiator.Start();
+
+            ReadyCallback = callback;
+            OrderCancelCallback = null;
+            OrderSubmitCallback = null;
+
             AccountUtil.ReadKeyFile(keyfile);
+            TradeSymbolString = symbol;
             TradeSymbol = new Symbol(symbol);
             OKTradingRequest.TradeSymbol = TradeSymbol;
             OKMarketDataRequest.TradeSymbol = TradeSymbol;
@@ -39,20 +60,33 @@ namespace Crux.Okcoin
             TrackLiveTrade = livetrade;
         }
 
-        public void CancelAllOrders()
+        ~OKCMarketAPI()
         {
-            throw new NotImplementedException();
+            Initiator.Stop();
+            Initiator.Dispose();
         }
 
-        public void CancelOrder(Order order)
+        public void CancelAllOrders()
         {
+            CurrentSession.Send(OKTradingRequest.CreateOrderMassStatusRequest());
+            Thread.Sleep(500);
+            foreach (var order in CurrentOrders)
+            {
+                CancelOrder(order);
+            }
+        }
+
+        public void CancelOrder(Order order, OperationCallback callback = null)
+        {
+            OrderCancelCallback = callback;
             var request = OKTradingRequest.CreateOrderCancelRequest(order);
             CurrentSession.Send(request);
+            Log.Write($"Cancel order {order.Volume} at {order.Price.ToString("N3")}", 1);
         }
 
         public List<Order> GetActiveOrders()
         {
-            throw new NotImplementedException();
+            return CurrentOrders;
         }
 
         public double GetBalanceFiat()
@@ -62,18 +96,17 @@ namespace Crux.Okcoin
 
         public double GetBalanceSecurity()
         {
-            var symbol = TradeSymbol.getValue();
-            if (symbol.Contains("BTC"))
+            if (TradeSymbolString.Contains("BTC"))
             {
                 return BalanceBTC;
             }
-            else if (symbol.Contains("LTC"))
+            else if (TradeSymbolString.Contains("LTC"))
             {
                 return BalanceLTC;
             }
             else
             {
-                Log.Write($"Broken symbol: {symbol}", 0);
+                Log.Write($"Broken symbol: {TradeSymbolString}", 0);
                 return 0;
             }
         }
@@ -85,19 +118,58 @@ namespace Crux.Okcoin
 
         public OrderBook GetOrderBook()
         {
-            throw new NotImplementedException();
+            return CurrentOrderBook;
         }
 
-        public Order SubmitOrder(double price, double volume, char side, char type)
+        public Order SubmitOrder(double price, double volume, char side, char type, OperationCallback callback = null)
         {
+            OrderSubmitCallback = callback;
             var request = OKTradingRequest.CreateNewOrderRequest(volume, price, side, type);
             CurrentSession.Send(request);
-            return null;
+            Log.Write($"Submit {(side == Side.BUY ? "BUY" : "SELL")} order: {volume} at {price.ToString("N3")}$", 1);
+            return new Order()
+            {
+                Price = price,
+                Volume = volume,
+                Side = side,
+                OrderType = type,
+                ClientOrderID = request.GetInt(Tags.ClOrdID),
+                Time = request.GetDateTime(Tags.TransactTime)
+            };
         }
 
         public bool Tick()
         {
             throw new NotImplementedException();
+        }
+
+        public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
+        {
+            string endPoint = "https://www.okcoin.com/api/v1/kline.do";
+            var client = new RestClient(endPoint, RestClient.HttpVerb.GET);
+            string symbol = TradeSymbolString.Contains("LTC") ? "ltc_usd" : "btc_usd";
+            string type;
+            switch (timespan)
+            {
+                case TimePeriod.ONE_MIN:
+                    type = "1min";
+                    break;
+                default:
+                case TimePeriod.ONE_HOUR:
+                    type = "1hour";
+                    break;
+                case TimePeriod.ONE_DAY:
+                    type = "1day";
+                    break;
+            }
+            var json = client.MakeRequest($"?symbol={symbol}&type={type}&size={numPeriods}");
+            var data = (JArray)JsonConvert.DeserializeObject(json);
+            if (data.Count != numPeriods)
+            {
+                Log.Write($"Got the wrong number of historical prices. Asked: {numPeriods} | Received: {data.Count}", 0);
+            }
+
+            return data.Select(d => new Candle((double)d[1], (double)d[4], (double)d[2], (double)d[3]));
         }
 
         /// <summary>
@@ -192,37 +264,66 @@ namespace Crux.Okcoin
             int clientOrderID = msg.GetInt(Tags.ClOrdID);
             switch (executionReportType)
             {
-                case '0':
+                case ExecType.NEW:
                     {
                         // New order execution report
                         string avgPrice = msg.GetString(Tags.AvgPx);
                         char side = msg.GetChar(Tags.Side);
                         CurrentOrders.Add(new Order()
                         {
-                            OrderID = msg.GetInt(Tags.ExecID),
+                            OrderID = msg.GetString(Tags.ExecID),
                             ClientOrderID = clientOrderID,
                             Price = double.Parse(avgPrice),
                             Side = side
                         });
-                        Log.Write($"New {(side.Equals(Side.BUY) ? "BUY" : "SELL")} order at {avgPrice}", 1);
+                        OrderSubmitCallback?.Invoke(false);
+                        OrderSubmitCallback = null;
+                        Log.Write($"New {(side.Equals(Side.BUY) ? "BUY" : "SELL")} order placed", 1);
                         break;
                     }
-                case '4':
+                case ExecType.PARTIAL_FILL:
+                    {
+                        // Order executed
+                        double executionPrice = (double)msg.GetDecimal(Tags.AvgPx);
+                        int orderStatus = msg.GetInt(Tags.OrdStatus);
+                        char side = msg.GetChar(Tags.Side);
+
+                        double remainingQty = (double)msg.GetDecimal(Tags.LeavesQty);
+                        CurrentOrders.First(o => o.ClientOrderID == clientOrderID).Volume = remainingQty;
+                        Log.Write($"{(side.Equals(Side.BUY) ? "BUY" : "SELL")} order partially filled ({(double)msg.GetDecimal(Tags.CumQty)}/{remainingQty}) at {executionPrice}", 1);
+                        break;
+                    }
+                case ExecType.FILL:
+                    {
+                        // Order executed
+                        double executionPrice = (double)msg.GetDecimal(Tags.AvgPx);
+                        int orderStatus = msg.GetInt(Tags.OrdStatus);
+                        char side = msg.GetChar(Tags.Side);
+                        CurrentOrders.RemoveAll(o => o.ClientOrderID == clientOrderID);
+                        Log.Write($"{(side.Equals(Side.BUY) ? "BUY" : "SELL")} order filled {msg.GetDecimal(Tags.CumQty)} at {executionPrice}", 1);
+                        break;
+                    }
+
+                case ExecType.CANCELED:
                     {
                         // Order cancel report
                         string orderID = msg.GetString(Tags.ExecID);
                         CurrentOrders.RemoveAll(o => o.ClientOrderID == clientOrderID);
+                        OrderCancelCallback?.Invoke(false);
+                        OrderCancelCallback = null;
                         break;
                     }
-                case '8':
+                case ExecType.REJECTED:
                     {
                         // Rejected order execution report
+                        OrderSubmitCallback?.Invoke(true);
+                        OrderSubmitCallback = null;
                         string orderStatus = msg.GetString(Tags.OrdStatus);
                         string text = msg.GetString(Tags.Text);
                         Log.Write($"Order rejected | status: {orderStatus} | reason: {text}", 1);
                         break;
                     }
-                case 'A':
+                case ExecType.PENDING_NEW:
                     {
                         // Requested Order info
                         int numReports = msg.GetInt(Tags.TotNumReports);
@@ -230,7 +331,7 @@ namespace Crux.Okcoin
                         {
                             CurrentOrders.Add(new Order()
                             {
-                                OrderID = msg.GetInt(Tags.OrderID),
+                                OrderID = msg.GetString(Tags.OrderID),
                                 ClientOrderID = clientOrderID,
                                 Price = (double)msg.GetDecimal(Tags.AvgPx),
                                 Side = msg.GetChar(Tags.Side)
@@ -238,29 +339,17 @@ namespace Crux.Okcoin
                         }
                         break;
                     }
-                case 'F':
-                    {
-                        // Order executed
-                        double executionPrice = (double)msg.GetDecimal(Tags.AvgPx);
-                        int orderStatus = msg.GetInt(Tags.OrdStatus);
-                        switch (orderStatus)
-                        {
-                            case 1:
-                                // partial fill
-                                int remainingQty = msg.GetInt(Tags.LeavesQty);
-                                CurrentOrders.First(o => o.ClientOrderID == clientOrderID).Volume = remainingQty;
-                                break;
-                            case 2:
-                                // full fill
-                                CurrentOrders.RemoveAll(o => o.ClientOrderID == clientOrderID);
-                                break;
-                        }
-                        break;
-                    }
                 default:
                     Log.Write($"Unknown execution report type {executionReportType}", 0);
                     break;
             }
+        }
+
+        public void OnMessage(QuickFix.FIX44.OrderCancelReject msg, SessionID sessionID)
+        {
+            OrderCancelCallback?.Invoke(true);
+            OrderCancelCallback = null;
+            Log.Write($"Order cancel error: {msg.GetString(Tags.Text)}", 0);
         }
 
         /// <summary>
@@ -351,6 +440,9 @@ namespace Crux.Okcoin
 
             // Fetch user info
             CurrentSession.Send(OKTradingRequest.CreateUserAccountRequest());
+
+            ReadyCallback?.Invoke();
+            ReadyCallback = null;
         }
 
         /// <summary>
@@ -384,5 +476,7 @@ namespace Crux.Okcoin
             Log.Write("===== Application Message Sent =====", 3);
             Log.Write($"{sessionID} : {msg.ToString()}", 3);
         }
+
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Crux
 {
@@ -39,40 +38,36 @@ namespace Crux
 
         public static void Write(string msg, int level)
         {
-            Task.Run(() =>
+            if (level <= LogLevel)
             {
-                if (level <= LogLevel)
+                switch (level)
                 {
-                    switch (level)
-                    {
-                        case 0:
-                            {
-                                var prevColor = Console.ForegroundColor;
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine(msg);
-                                Console.ForegroundColor = prevColor;
-                                break;
-                            }
-                        case 1:
-                            {
-                                var prevColor = Console.ForegroundColor;
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine(msg);
-                                Console.ForegroundColor = prevColor;
-                                break;
-                            }
-                        case 2:
-                        case 3:
-                            {
-                                Console.WriteLine(msg);
-                                break;
-                            }
-                    }
-
-                    FileWriter?.WriteLine($"[{level}] {msg}");
-                    FileWriter?.Flush();
+                    case 0:
+                        {
+                            var prevColor = Console.ForegroundColor;
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine(msg);
+                            Console.ForegroundColor = prevColor;
+                            break;
+                        }
+                    case 1:
+                        {
+                            var prevColor = Console.ForegroundColor;
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine(msg);
+                            Console.ForegroundColor = prevColor;
+                            break;
+                        }
+                    case 2:
+                    case 3:
+                        {
+                            Console.WriteLine(msg);
+                            break;
+                        }
                 }
-            });
+
+                FileWriter?.WriteLine($"[{level}] [{DateTime.Now}] {msg}");
+            }
         }
     }
 }

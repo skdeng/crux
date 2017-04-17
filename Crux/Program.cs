@@ -1,5 +1,5 @@
-﻿using Crux.Okcoin;
-using System;
+﻿using Crux.BasicStrategy;
+using Crux.Okcoin;
 
 namespace Crux
 {
@@ -7,23 +7,16 @@ namespace Crux
     {
         static void Main(string[] args)
         {
-            try
+            Log.LogExportFile = "log.txt";
+            Log.LogLevel = 3;
+            OKCMarketAPI okcAPI = null;
+            okcAPI = new OKCMarketAPI("../../../Keys/okc.txt", "LTC/USD", true, true, new MarketAPIReadyCallback(() =>
             {
-                QuickFix.SessionSettings settings = new QuickFix.SessionSettings("config/quickfix-client.cfg");
-                OKCMarketAPI application = new OKCMarketAPI("../../../Keys/okc.txt", "BTC/USD", false, true);
-                QuickFix.IMessageStoreFactory storeFactory = new QuickFix.FileStoreFactory(settings);
-                QuickFix.ILogFactory logFactory = new QuickFix.ScreenLogFactory(settings);
-                QuickFix.Transport.SocketInitiator initiator = new QuickFix.Transport.SocketInitiator(application, storeFactory, settings, logFactory);
-                initiator.Start();
-                Console.ReadKey();
-                initiator.Stop();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.StackTrace);
-                Console.ReadKey();
-            }
+                MeanReversalStrategy meanReversalStrategy = new MeanReversalStrategy(okcAPI, 3600000, 24);
+                meanReversalStrategy.Start(false);
+            }));
+            //MeanReversalStrategy meanReversalStrategy = new MeanReversalStrategy(okcAPI, 3600000, 24);
+            //meanReversalStrategy.Start(false);
         }
     }
 }

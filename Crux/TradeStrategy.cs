@@ -36,20 +36,38 @@ namespace Crux
             {
                 if (TradeThread == null)
                 {
-                    TradeThread = new Thread(new ThreadStart(Trade));
+                    TradeThread = new Thread(new ThreadStart(_Trade));
                 }
                 TradeThread.Start();
             }
             else
             {
-                Trade();
+                _Trade();
             }
         }
 
         public void Stop()
         {
             Trading = false;
-            TradeThread.Join();
+            if (TradeThread != null)
+            {
+                TradeThread.Join();
+            }
+        }
+
+        private void _Trade()
+        {
+            while (Trading)
+            {
+                var beforeValue = PortfolioValue;
+                Trade();
+
+                Log.Write($"USD: {MarketTerminal.GetBalanceFiat()} | Asset: {MarketTerminal.GetBalanceSecurity()}", 1);
+
+                var periodPL = PortfolioValue / beforeValue;
+                PL.Add(periodPL);
+                Log.Write($"Period PL: {periodPL} | Cumulative PL: {CumulativePL}", 1);
+            }
         }
 
         protected abstract void Trade();

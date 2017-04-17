@@ -114,7 +114,7 @@ namespace Crux
                     for (current = BestBid; current != null && current.Price > price; prev = current, current = current.Next) ;
                     if (current == null || current.Price != price)
                     {
-                        Log.Write("Error: Trying to remove inexistant book order", 0);
+                        Log.Write("Error: Trying to remove inexistant book order", 3);
                         BidLock.ReleaseMutex();
                         return;
                     }
@@ -144,7 +144,7 @@ namespace Crux
                     for (current = BestOffer; current != null && current.Price < price; prev = current, current = current.Next) ;
                     if (current == null || current.Price != price)
                     {
-                        Log.Write("Error: Trying to remove inexistant book order", 0);
+                        Log.Write("Error: Trying to remove inexistant book order", 3);
                         //OfferLock.ReleaseMutex();
                         return;
                     }

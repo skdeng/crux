@@ -59,7 +59,7 @@ namespace Crux.Bfx
             SocketTerminal.Send(cancelGroupOrderMessage);
         }
 
-        public void CancelOrder(Order order)
+        public void CancelOrder(Order order, OperationCallback callback = null)
         {
             var subCancelOrder = new CancelOrderMessage(order);
             var cancelOrderMessage = BuildRequestMsg(subCancelOrder, "oc");
@@ -91,7 +91,7 @@ namespace Crux.Bfx
             throw new NotImplementedException();
         }
 
-        public Order SubmitOrder(double price, double volume, char side, char type)
+        public Order SubmitOrder(double price, double volume, char side, char type, OperationCallback callback = null)
         {
             var subOrderMsg = new NewOrderMessage(TradeSymbol, price, volume, side, type);
             var orderMsg = BuildRequestMsg(subOrderMsg, "on");
@@ -112,6 +112,11 @@ namespace Crux.Bfx
         }
 
         public bool Tick()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
         {
             throw new NotImplementedException();
         }
@@ -172,7 +177,7 @@ namespace Crux.Bfx
                     {
                         var order = new Order()
                         {
-                            OrderID = (int)dataArray[0],
+                            OrderID = dataArray[0].ToString(),
                             ClientOrderID = (int)dataArray[2],
                             Time = (DateTime)dataArray[4],
                             Volume = Math.Abs((double)dataArray[6]),

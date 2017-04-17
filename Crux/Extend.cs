@@ -11,5 +11,10 @@ namespace Crux
             double avg = values.Average();
             return Math.Sqrt(values.Average(v => Math.Pow(v - avg, 2)));
         }
+
+        public static int UnixTimestamp(this DateTime time)
+        {
+            return (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+        }
     }
 }

@@ -44,7 +44,7 @@ namespace BackTest
             CurrentOrders.RemoveRange(0, CurrentOrders.Count);
         }
 
-        public void CancelOrder(Order order)
+        public void CancelOrder(Order order, OperationCallback callback = null)
         {
             OrderLock.WaitOne();
             CurrentOrders.RemoveAll(o => o.ClientOrderID == order.ClientOrderID || o.OrderID == order.OrderID);
@@ -76,7 +76,7 @@ namespace BackTest
             return null;
         }
 
-        public Order SubmitOrder(double price, double volume, char side, char type)
+        public Order SubmitOrder(double price, double volume, char side, char type, OperationCallback callback = null)
         {
             switch (side)
             {
@@ -99,9 +99,9 @@ namespace BackTest
             if (type.Equals(OrdType.MARKET))
             {
                 ExecuteOrder(volume, side);
-                return new Order() { Price = price, Volume = volume, Side = side, OrderType = type, OrderID = GetFreeID };
+                return new Order() { Price = price, Volume = volume, Side = side, OrderType = type, ClientOrderID = GetFreeID };
             }
-            var newOrder = new Order() { Price = price, Volume = volume, Side = side, OrderType = type, OrderID = GetFreeID };
+            var newOrder = new Order() { Price = price, Volume = volume, Side = side, OrderType = type, ClientOrderID = GetFreeID };
 
             OrderLock.WaitOne();
             CurrentOrders.Add(newOrder);
@@ -154,6 +154,11 @@ namespace BackTest
             {
                 return true;
             }
+        }
+
+        public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
+        {
+            throw new NotImplementedException();
         }
 
         private void ExecuteOrder(double volume, char side)
