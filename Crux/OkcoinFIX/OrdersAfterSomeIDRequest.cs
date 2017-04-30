@@ -2,7 +2,7 @@
 using QuickFix.Fields;
 using System;
 
-namespace Crux.Okcoin
+namespace Crux.OkcoinFIX
 {
     class OrdersAfterSomeIDRequest : Message
     {

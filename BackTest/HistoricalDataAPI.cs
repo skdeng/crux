@@ -3,6 +3,7 @@ using QuickFix.Fields;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace BackTest
@@ -44,16 +45,23 @@ namespace BackTest
             CurrentOrders.RemoveRange(0, CurrentOrders.Count);
         }
 
-        public void CancelOrder(Order order, OperationCallback callback = null)
+        public void CancelOrder(Order order, OrderOperationCallback callback = null)
         {
             OrderLock.WaitOne();
             CurrentOrders.RemoveAll(o => o.ClientOrderID == order.ClientOrderID || o.OrderID == order.OrderID);
             OrderLock.ReleaseMutex();
         }
 
-        public List<Order> GetActiveOrders()
+        public List<Order> GetActiveOrders(Order queryOrder = null)
         {
-            return CurrentOrders;
+            if (queryOrder != null)
+            {
+                return CurrentOrders.Where(o => o.Equals(queryOrder)).ToList();
+            }
+            else
+            {
+                return CurrentOrders;
+            }
         }
 
         public double GetBalanceFiat()
@@ -76,7 +84,7 @@ namespace BackTest
             return null;
         }
 
-        public Order SubmitOrder(double price, double volume, char side, char type, OperationCallback callback = null)
+        public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)
         {
             switch (side)
             {

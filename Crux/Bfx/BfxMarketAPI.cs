@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using WebSocket4Net;
 
 namespace Crux.Bfx
@@ -28,6 +29,9 @@ namespace Crux.Bfx
         private Trade LastTrade;
 
         private List<Order> CurrentOrders;
+
+        private OrderOperationCallback OrderSubmitCallback;
+        private OrderOperationCallback OrderCancelCallback;
 
         public BfxMarketAPI(string keyFile, string symbol)
         {
@@ -59,16 +63,23 @@ namespace Crux.Bfx
             SocketTerminal.Send(cancelGroupOrderMessage);
         }
 
-        public void CancelOrder(Order order, OperationCallback callback = null)
+        public void CancelOrder(Order order, OrderOperationCallback callback = null)
         {
             var subCancelOrder = new CancelOrderMessage(order);
             var cancelOrderMessage = BuildRequestMsg(subCancelOrder, "oc");
             SocketTerminal.Send(cancelOrderMessage);
         }
 
-        public List<Order> GetActiveOrders()
+        public List<Order> GetActiveOrders(Order queryOrder = null)
         {
-            throw new NotImplementedException();
+            if (queryOrder != null)
+            {
+                return CurrentOrders.Where(o => o.Equals(queryOrder)).ToList();
+            }
+            else
+            {
+                return CurrentOrders;
+            }
         }
 
         public double GetBalanceFiat()
@@ -91,7 +102,7 @@ namespace Crux.Bfx
             throw new NotImplementedException();
         }
 
-        public Order SubmitOrder(double price, double volume, char side, char type, OperationCallback callback = null)
+        public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)
         {
             var subOrderMsg = new NewOrderMessage(TradeSymbol, price, volume, side, type);
             var orderMsg = BuildRequestMsg(subOrderMsg, "on");
@@ -183,10 +194,13 @@ namespace Crux.Bfx
                             Volume = Math.Abs((double)dataArray[6]),
 
                         };
+                        OrderSubmitCallback?.Invoke(false);
+                        OrderSubmitCallback = null;
                     }
                     else if (msgType.Equals("oc")) // cancel order confirmation
                     {
-
+                        OrderCancelCallback?.Invoke(false);
+                        OrderCancelCallback = null;
                     }
                 }
                 else if (channelID == ChannelID["trades"])
@@ -241,7 +255,7 @@ namespace Crux.Bfx
             SocketTerminal.Send(subMsgStr);
         }
 
-        private string BuildRequestMsg(BaseMessage subMsg, string msgType)
+        private string BuildRequestMsg(WebsocketMessage subMsg, string msgType)
         {
             var reqMsg = new JArray();
             reqMsg.Add(new JValue(0));

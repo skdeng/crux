@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Crux.Okcoin
+namespace Crux.OkcoinFIX
 {
     class AccReqID : QuickFix.Fields.StringField
     {

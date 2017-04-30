@@ -79,27 +79,36 @@ namespace Crux
                 }
             }
 
-            using (var response = (HttpWebResponse)request.GetResponse())
+            try
             {
-                var responseValue = string.Empty;
-
-                if (response.StatusCode != HttpStatusCode.OK)
+                using (var response = (HttpWebResponse)request.GetResponse())
                 {
-                    var message = String.Format("Request failed. Received HTTP {0}", response.StatusCode);
-                    throw new ApplicationException(message);
-                }
+                    var responseValue = string.Empty;
 
-                // grab the response
-                using (var responseStream = response.GetResponseStream())
-                {
-                    if (responseStream != null)
-                        using (var reader = new StreamReader(responseStream))
-                        {
-                            responseValue = reader.ReadToEnd();
-                        }
-                }
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        var message = String.Format("Request failed. Received HTTP {0}", response.StatusCode);
+                        throw new ApplicationException(message);
+                    }
 
-                return responseValue;
+                    // grab the response
+                    using (var responseStream = response.GetResponseStream())
+                    {
+                        if (responseStream != null)
+                            using (var reader = new StreamReader(responseStream))
+                            {
+                                responseValue = reader.ReadToEnd();
+                            }
+                    }
+
+                    return responseValue;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Write(e.Message, 0);
+                Log.Write(e.StackTrace, 0);
+                return MakeRequest(parameters);
             }
         }
     }

@@ -9,6 +9,7 @@ namespace Crux
         public double Price { get; set; }
         public char Side { get; set; }
         public double Volume { get; set; }
+        public double FilledVolume { get; set; }
         public char OrderType { get; set; }
         public DateTime Time { get; set; }
 
@@ -17,8 +18,12 @@ namespace Crux
             return (ClientOrderID == other.ClientOrderID || other.OrderID == other.OrderID) &&
                     Price == other.Price &&
                     Volume == other.Volume &&
-                    Side == other.Side &&
-                    Time == other.Time;
+                    Side == other.Side;
+        }
+
+        public override string ToString()
+        {
+            return $"Order ({OrderID}): {(Side.Equals(QuickFix.Fields.Side.BUY) ? "BUY" : "SELL")} {FilledVolume}/{Volume} at {Price.ToString("N3")}";
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Crux.Okcoin
+namespace Crux.OkcoinFIX
 {
     public class AccountUtil
     {

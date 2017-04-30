@@ -1,7 +1,7 @@
 ﻿using QuickFix;
 using QuickFix.Fields;
 
-namespace Crux.Okcoin
+namespace Crux.OkcoinFIX
 {
     class OKMarketDataRequest
     {

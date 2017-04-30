@@ -12,13 +12,13 @@ pl = []
 apl = []
 trade = []
 
-FRICTION = 0.01
+FRICTION = 0.005
 MA_LAG = 72
 ma = [0 if i < MA_LAG-1 else np.average(price[i-MA_LAG+1:i+1]) for i in range(len(price))]
 mstd = [0 if i < MA_LAG-1 else np.std(price[i-MA_LAG+1:i+1]) for i in range(len(price))]
 
-usd = 100
-btc = 10
+usd = 1
+btc = 100
 
 start_value = usd + btc * price[MA_LAG-1]
 
@@ -72,8 +72,8 @@ print ("Asset PL: {}".format(price[-1] / price[MA_LAG-1]))
 
 total_val = [walusd[i] + walbtc[i] * price[MA_LAG-1+i] / 100 for i in range(len(walusd))]
 
-# plt.plot(pl, label='Strategy P/L MA:{}'.format(MA_LAG))
-# plt.plot(apl, label='Asset P/L')
+plt.plot(pl, label='Strategy P/L MA:{}'.format(MA_LAG))
+plt.plot(apl, label='Asset P/L')
 # plt.plot(walusd)
 # plt.plot(walbtc)
 
@@ -82,11 +82,10 @@ price = np.array(price[MA_LAG-1:])
 buys = np.where(trade == 0)[0]
 sells = np.where(trade == 1)[0]
 
-plt.plot(price)
+# plt.plot(price)
 # plt.plot(ma[MA_LAG-1:])
-plt.scatter(buys, price[buys], c='green')
-plt.scatter(sells, price[sells], c='red')
+# plt.scatter(buys, price[buys], c='green')
+# plt.scatter(sells, price[sells], c='red')
 
-plt.title("Ethereum Hourly Mean Reversal")
 plt.legend(loc='upper left')
 plt.show()

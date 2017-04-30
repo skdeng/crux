@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Crux.Bfx
 {
     [DataContract]
-    class NewOrderMessage : BaseMessage
+    class NewOrderMessage : WebsocketMessage
     {
         private static uint _OrderID = 0;
         private static uint FreeOrderID { get { return _OrderID++; } }

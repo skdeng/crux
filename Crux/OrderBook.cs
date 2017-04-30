@@ -88,12 +88,8 @@ namespace Crux
             }
         }
 
-        public void RemoveOrder(double price, char side, double vol)
+        public void RemoveOrder(double price, char side)
         {
-            if (vol == 0)
-            {
-                return;
-            }
             if (side.Equals(MDEntryType.BID))
             {
                 BidLock.WaitOne();
@@ -161,6 +157,12 @@ namespace Crux
             }
         }
 
+        /// <summary>
+        /// Change the size of depth at a certain price. If there is no volume at a certain price, the depth is added
+        /// </summary>
+        /// <param name="price"></param>
+        /// <param name="vol"></param>
+        /// <param name="side"></param>
         public void ChangeOrder(double price, double vol, char side)
         {
             BookOrder current = null;

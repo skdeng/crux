@@ -57,6 +57,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Bfx\BfxMarketAPITest.cs" />
+    <Compile Include="OkcoinREST\OKCMarketRESTAPITest.cs" />
     <Compile Include="OrderBookTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

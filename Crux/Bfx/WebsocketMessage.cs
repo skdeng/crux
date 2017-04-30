@@ -3,7 +3,7 @@
 namespace Crux.Bfx
 {
     [DataContract]
-    abstract class BaseMessage
+    abstract class WebsocketMessage
     {
 
     }

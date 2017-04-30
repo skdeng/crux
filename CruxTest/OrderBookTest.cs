@@ -63,7 +63,7 @@ namespace CruxTest
             book.AddOrder(11, 2, MDEntryType.BID);
             book.AddOrder(12, 3, MDEntryType.BID);
 
-            book.RemoveOrder(12, MDEntryType.BID, 3);
+            book.RemoveOrder(12, MDEntryType.BID);
 
             Assert.AreEqual(11, book.BestBid.Price);
             Assert.AreEqual(3, book.CumulativeVolume(10, MDEntryType.BID));
@@ -77,7 +77,7 @@ namespace CruxTest
             book.AddOrder(11, 2, MDEntryType.OFFER);
             book.AddOrder(12, 3, MDEntryType.OFFER);
 
-            book.RemoveOrder(10, MDEntryType.OFFER, 1);
+            book.RemoveOrder(10, MDEntryType.OFFER);
 
             Assert.AreEqual(11, book.BestOffer.Price);
             Assert.AreEqual(5, book.CumulativeVolume(12, MDEntryType.OFFER));

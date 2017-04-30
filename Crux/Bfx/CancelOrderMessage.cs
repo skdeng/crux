@@ -3,7 +3,7 @@
 namespace Crux.Bfx
 {
     [DataContract]
-    class CancelOrderMessage : BaseMessage
+    class CancelOrderMessage : WebsocketMessage
     {
         [DataMember(Name = "id")]
         public int ID { get; set; }

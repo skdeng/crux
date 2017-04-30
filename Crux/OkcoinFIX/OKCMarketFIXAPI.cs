@@ -7,45 +7,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Crux.Okcoin
+namespace Crux.OkcoinFIX
 {
-    class OKCMarketAPI : MessageCracker, IApplication, MarketAPI
+    class OKCMarketFIXAPI : MessageCracker, IApplication, MarketAPI
     {
         private Session CurrentSession;
 
-        private readonly List<Order> CurrentOrders = new List<Order>();
+        private List<Order> CurrentOrders;
+        private OrderBook CurrentOrderBook;
+        private Trade LastTrade;
 
         private double BalanceBTC;
-
         private double BalanceLTC;
-
         private double BalanceUSD;
-
-        private OrderBook CurrentOrderBook = new OrderBook();
 
         private string TradeSymbolString;
         private Symbol TradeSymbol;
-
-        private Trade LastTrade;
 
         private bool TrackOrderBook;
         private bool TrackLiveTrade;
 
         private QuickFix.Transport.SocketInitiator Initiator;
 
-        private MarketAPIReadyCallback ReadyCallback;
-        private OperationCallback OrderCancelCallback;
-        private OperationCallback OrderSubmitCallback;
+        private OrderOperationCallback OrderCancelCallback;
+        private OrderOperationCallback OrderSubmitCallback;
 
-        public OKCMarketAPI(string keyfile, string symbol, bool orderbook, bool livetrade, MarketAPIReadyCallback callback = null)
+        public OKCMarketFIXAPI(string keyfile, string symbol, bool orderbook, bool livetrade)
         {
             SessionSettings settings = new SessionSettings("config/quickfix-client.cfg");
-            IMessageStoreFactory storeFactory = new FileStoreFactory(settings);
-            ILogFactory logFactory = new ScreenLogFactory(settings);
+            var storeFactory = new FileStoreFactory(settings);
+            var logFactory = new ScreenLogFactory(settings);
             Initiator = new QuickFix.Transport.SocketInitiator(this, storeFactory, settings, logFactory);
             Initiator.Start();
 
-            ReadyCallback = callback;
             OrderCancelCallback = null;
             OrderSubmitCallback = null;
 
@@ -54,13 +48,18 @@ namespace Crux.Okcoin
             TradeSymbol = new Symbol(symbol);
             OKTradingRequest.TradeSymbol = TradeSymbol;
             OKMarketDataRequest.TradeSymbol = TradeSymbol;
+            CurrentOrders = new List<Order>();
+            if (orderbook)
+            {
+                CurrentOrderBook = new OrderBook();
+            }
 
             LastTrade = null;
             TrackOrderBook = orderbook;
             TrackLiveTrade = livetrade;
         }
 
-        ~OKCMarketAPI()
+        ~OKCMarketFIXAPI()
         {
             Initiator.Stop();
             Initiator.Dispose();
@@ -76,7 +75,7 @@ namespace Crux.Okcoin
             }
         }
 
-        public void CancelOrder(Order order, OperationCallback callback = null)
+        public void CancelOrder(Order order, OrderOperationCallback callback = null)
         {
             OrderCancelCallback = callback;
             var request = OKTradingRequest.CreateOrderCancelRequest(order);
@@ -84,9 +83,16 @@ namespace Crux.Okcoin
             Log.Write($"Cancel order {order.Volume} at {order.Price.ToString("N3")}", 1);
         }
 
-        public List<Order> GetActiveOrders()
+        public List<Order> GetActiveOrders(Order queryOrder = null)
         {
-            return CurrentOrders;
+            if (queryOrder != null)
+            {
+                return CurrentOrders.Where(o => o.ClientOrderID == queryOrder.ClientOrderID).ToList();
+            }
+            else
+            {
+                return CurrentOrders;
+            }
         }
 
         public double GetBalanceFiat()
@@ -121,7 +127,7 @@ namespace Crux.Okcoin
             return CurrentOrderBook;
         }
 
-        public Order SubmitOrder(double price, double volume, char side, char type, OperationCallback callback = null)
+        public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)
         {
             OrderSubmitCallback = callback;
             var request = OKTradingRequest.CreateNewOrderRequest(volume, price, side, type);
@@ -224,7 +230,7 @@ namespace Crux.Okcoin
                             CurrentOrderBook.ChangeOrder((double)entry.GetDecimal(Tags.MDEntryPx), (double)entry.GetDecimal(Tags.MDEntrySize), entry.GetChar(Tags.MDEntryType));
                             break;
                         case MDUpdateAction.DELETE:
-                            CurrentOrderBook.RemoveOrder((double)entry.GetDecimal(Tags.MDEntryPx), entry.GetChar(Tags.MDEntryType), (double)entry.GetDecimal(Tags.MDEntrySize));
+                            CurrentOrderBook.RemoveOrder((double)entry.GetDecimal(Tags.MDEntryPx), entry.GetChar(Tags.MDEntryType));
                             break;
                         default:
                             Log.Write($"Unknown market data update action {action}", 0);
@@ -248,7 +254,7 @@ namespace Crux.Okcoin
         }
 
         /// <summary>
-        /// Report after an inquiry about orders is made
+        /// Report after a request about orders is made
         /// Possible cause: 
         /// - New order
         /// - Cancel order
@@ -440,9 +446,6 @@ namespace Crux.Okcoin
 
             // Fetch user info
             CurrentSession.Send(OKTradingRequest.CreateUserAccountRequest());
-
-            ReadyCallback?.Invoke();
-            ReadyCallback = null;
         }
 
         /// <summary>
