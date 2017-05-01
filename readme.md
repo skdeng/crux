@@ -1,5 +1,4 @@
 # Project Crux
-----------
 Cryptocurrency Algorithmic Trading Framework in C#
 
 ### Sub-Projects
