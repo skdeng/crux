@@ -63,7 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicStrategy\MomentumStrategy.cs" />
-    <Compile Include="BasicStrategy\PairMeanReversalStrategy.cs" />
     <Compile Include="Bfx\AuthMessage.cs" />
     <Compile Include="Bfx\BfxMarketAPI.cs" />
     <Compile Include="Bfx\WebsocketMessage.cs" />
@@ -88,10 +87,10 @@
     <Compile Include="OkcoinFIX\AccountInfoRequest.cs" />
     <Compile Include="OkcoinFIX\AccountUtil.cs" />
     <Compile Include="OkcoinFIX\AccReqID.cs" />
-    <Compile Include="BasicStrategy\BBandStrategy.cs" />
+    <Compile Include="BasicStrategy\AbsoluteMeanReversalStrategy.cs" />
     <Compile Include="BasicStrategy\MarketMaker.cs" />
     <Compile Include="BasicStrategy\MeanReversalStrategy.cs" />
-    <Compile Include="Benchmark.cs" />
+    <Compile Include="Statistics.cs" />
     <Compile Include="Candle.cs" />
     <Compile Include="Extend.cs" />
     <Compile Include="MarketAPI.cs" />

@@ -16,9 +16,9 @@ namespace CruxTest
             book.AddOrder(12, 3, MDEntryType.BID);
 
             Assert.AreEqual(12, book.BestBid.Price);
-            Assert.AreEqual(3, book.BestBid.Vol);
+            Assert.AreEqual(3, book.BestBid.Volume);
             Assert.AreEqual(11, book.BestBid.Next.Price);
-            Assert.AreEqual(2, book.BestBid.Next.Vol);
+            Assert.AreEqual(2, book.BestBid.Next.Volume);
 
             Assert.AreEqual(3, book.NumBids);
 
@@ -40,9 +40,9 @@ namespace CruxTest
             book.AddOrder(12, 3, MDEntryType.OFFER);
 
             Assert.AreEqual(10, book.BestOffer.Price);
-            Assert.AreEqual(1, book.BestOffer.Vol);
+            Assert.AreEqual(1, book.BestOffer.Volume);
             Assert.AreEqual(11, book.BestOffer.Next.Price);
-            Assert.AreEqual(2, book.BestOffer.Next.Vol);
+            Assert.AreEqual(2, book.BestOffer.Next.Volume);
 
             Assert.AreEqual(3, book.NumOffers);
 
@@ -94,9 +94,9 @@ namespace CruxTest
             book.ChangeOrder(12.5, 4, MDEntryType.BID);
 
             Assert.AreEqual(12.5, book.BestBid.Price);
-            Assert.AreEqual(4, book.BestBid.Vol);
+            Assert.AreEqual(4, book.BestBid.Volume);
             Assert.AreEqual(12, book.BestBid.Next.Price);
-            Assert.AreEqual(3, book.BestBid.Next.Vol);
+            Assert.AreEqual(3, book.BestBid.Next.Volume);
 
             Assert.AreEqual(4, book.NumBids);
 

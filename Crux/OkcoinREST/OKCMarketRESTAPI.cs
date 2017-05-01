@@ -63,7 +63,7 @@ namespace Crux.OkcoinREST
             var response = (JObject)JsonConvert.DeserializeObject(json);
             if ((bool)response["result"])
             {
-                Log.Write($"Cancel {(order.Side == Side.BUY ? "BUY" : "SELL")} order: {order.Volume} at {order.Price.ToString("N3")}$", 2);
+                Log.Write($"Cancel {order}", 2);
             }
             else
             {
@@ -174,7 +174,7 @@ namespace Crux.OkcoinREST
                 Log.Write($"Got the wrong number of historical prices. Asked: {numPeriods} | Received: {data.Count}", 0);
             }
 
-            return data.Select(d => new Candle((double)d[1], (double)d[4], (double)d[2], (double)d[3]));
+            return data.Select(d => new Candle((double)d[1], (double)d[4], (double)d[2], (double)d[3], timespan));
         }
 
         public double GetLastPrice()
@@ -239,7 +239,7 @@ namespace Crux.OkcoinREST
             Order order = null;
             if (result)
             {
-                Log.Write($"Submit {(side == Side.BUY ? "BUY" : "SELL")} order [{response["order_id"]}]: {volume} at {price.ToString("N3")}$", 2);
+                Log.Write($"Submit {order}", 2);
                 order = new Order()
                 {
                     Price = price,
@@ -258,11 +258,6 @@ namespace Crux.OkcoinREST
             callback?.Invoke(!result);
 
             return order;
-        }
-
-        public bool Tick()
-        {
-            throw new NotImplementedException();
         }
 
         private string BuildSignedMessage(Dictionary<string, string> param)

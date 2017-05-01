@@ -10,20 +10,12 @@ namespace Crux
         {
             while (true)
             {
-                try
-                {
-                    Log.LogExportFile = $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.txt";
-                    Log.LogLevel = 2;
-                    var okcAPI = new OKCMarketRESTAPI("../../../Keys/okc.txt", "LTC/USD");
-                    //Thread.Sleep(5000);
-                    MeanReversalStrategy meanReversalStrategy = new MeanReversalStrategy(okcAPI, 3600000 / 4, 12);
-                    meanReversalStrategy.Start(false);
-                }
-                catch (Exception e)
-                {
-                    Log.Write(e.Message, 0);
-                    Log.Write(e.StackTrace, 0);
-                }
+                Log.LogExportFile = $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.txt";
+                Log.LogLevel = 2;
+                var okcAPI = new OKCMarketRESTAPI("../../../Keys/okc.txt", "LTC/USD");
+                Statistics stats = new Statistics();
+                MeanReversalStrategy meanReversalStrategy = new MeanReversalStrategy(okcAPI, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 12, stats);
+                meanReversalStrategy.Start(false);
             }
         }
     }

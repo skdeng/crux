@@ -122,14 +122,9 @@ namespace Crux.Bfx
             return order;
         }
 
-        public bool Tick()
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
         {
-            throw new NotImplementedException();
+            return Enumerable.Empty<Candle>();
         }
 
         private void SocketTerminal_OnMessageReceived(object sender, MessageReceivedEventArgs e)

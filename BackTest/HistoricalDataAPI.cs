@@ -118,12 +118,12 @@ namespace BackTest
             return newOrder;
         }
 
-        public void StartTick()
+        public void StartTick(int delay)
         {
             while (CurrentTick < HistoricalPrices.Count)
             {
                 Tick();
-                Thread.Sleep(10);
+                Thread.Sleep(delay);
             }
         }
 
