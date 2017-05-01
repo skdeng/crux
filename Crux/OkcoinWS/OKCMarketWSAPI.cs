@@ -74,7 +74,7 @@ namespace Crux.OkcoinWS
             OrderCancelCallback = callback;
             var msg = JsonConvert.SerializeObject(new CancelOrderMessage(TradeSymbol, order.OrderID));
             SocketTerminal.Send(msg);
-            Log.Write($"Cancel {(order.Side == Side.BUY ? "BUY" : "SELL")} order: {order.Volume} at {order.Price.ToString("N3")}$", 2);
+            Log.Write($"Cancel {order}", 2);
         }
 
         public List<Order> GetActiveOrders(Order queryOrder = null)
@@ -130,7 +130,7 @@ namespace Crux.OkcoinWS
                 Log.Write($"Got the wrong number of historical prices. Asked: {numPeriods} | Received: {data.Count}", 0);
             }
 
-            return data.Select(d => new Candle((double)d[1], (double)d[4], (double)d[2], (double)d[3]));
+            return data.Select(d => new Candle((double)d[1], (double)d[4], (double)d[2], (double)d[3], timespan));
         }
 
         public double GetLastPrice()
@@ -162,18 +162,13 @@ namespace Crux.OkcoinWS
                 order.ClientOrderID = NewOrderID;
                 order.OrderID = NewOrderID.ToString();
                 CurrentOrders.Add(order);
-                Log.Write($"Submit {(side == Side.BUY ? "BUY" : "SELL")} order [{NewOrderID}]: {volume} at {price.ToString("N3")}$", 2);
+                Log.Write($"Submit {order}$", 2);
                 return order;
             }
             else
             {
                 return null;
             }
-        }
-
-        public bool Tick()
-        {
-            throw new NotImplementedException();
         }
 
         private void SocketTerminal_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)

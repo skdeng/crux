@@ -2,7 +2,7 @@
 {
     public class Candle
     {
-        public static int Timespan { get; set; }
+        public TimePeriod Timespan { get; set; }
 
         public double Open { get; set; }
 
@@ -12,12 +12,13 @@
 
         public double Low { get; set; }
 
-        public Candle(double open, double close, double high, double low)
+        public Candle(double open, double close, double high, double low, TimePeriod timeperiod)
         {
             Open = open;
             Close = close;
             High = high;
             Low = low;
+            Timespan = timeperiod;
         }
     }
 }

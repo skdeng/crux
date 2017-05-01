@@ -72,12 +72,6 @@ namespace Crux
         Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null);
 
         /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <returns></returns>
-        bool Tick();
-
-        /// <summary>
         /// Get historical prices
         /// </summary>
         /// <param name="timespan">Time spam of either period</param>

@@ -23,7 +23,7 @@ namespace Crux
 
         public override string ToString()
         {
-            return $"Order ({OrderID}): {(Side.Equals(QuickFix.Fields.Side.BUY) ? "BUY" : "SELL")} {FilledVolume}/{Volume} at {Price.ToString("N3")}";
+            return $"Order ({OrderID}|{ClientOrderID}): {(Side.Equals(QuickFix.Fields.Side.BUY) ? "BUY" : "SELL")} {FilledVolume}/{Volume} at {Price.ToString("N3")}$";
         }
     }
 }

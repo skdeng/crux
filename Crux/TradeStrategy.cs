@@ -1,17 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Linq;
 using System.Threading;
 
 namespace Crux
 {
     public abstract class TradeStrategy
     {
-        public readonly List<double> PL;
+        public Statistics StrategyStatistics { get; set; }
 
-        public double CumulativePL { get { return PortfolioValue / StartingPortfolioValue; } }
-
-        protected int CurrentTick;
-
-        public double StartingPortfolioValue;
+        public TimeSpan TimeUntilNextTrade { get; protected set; }
 
         public double PortfolioValue { get { return MarketTerminal.GetBalanceFiat() + MarketTerminal.GetBalanceSecurity() * MarketTerminal.GetLastPrice(); } }
 
@@ -21,12 +18,10 @@ namespace Crux
 
         private Thread TradeThread;
 
-        public TradeStrategy(MarketAPI api)
+        public TradeStrategy(MarketAPI api, Statistics stats)
         {
-            PL = new List<double>();
-            CurrentTick = 0;
             MarketTerminal = api;
-            StartingPortfolioValue = PortfolioValue;
+            StrategyStatistics = stats;
         }
 
         public void Start(bool async)
@@ -37,6 +32,7 @@ namespace Crux
                 if (TradeThread == null)
                 {
                     TradeThread = new Thread(new ThreadStart(_Trade));
+                    TradeThread.Priority = ThreadPriority.Highest;
                 }
                 TradeThread.Start();
             }
@@ -59,14 +55,10 @@ namespace Crux
         {
             while (Trading)
             {
-                var beforeValue = PortfolioValue;
                 Trade();
-
-                Log.Write($"USD: {MarketTerminal.GetBalanceFiat()} | Asset: {MarketTerminal.GetBalanceSecurity()}", 1);
-
-                var periodPL = PortfolioValue / beforeValue;
-                PL.Add(periodPL);
-                Log.Write($"Period PL: {periodPL} | Cumulative PL: {CumulativePL}", 1);
+                StrategyStatistics.Snapshot(MarketTerminal.GetBalanceFiat(), MarketTerminal.GetBalanceSecurity(), MarketTerminal.GetLastPrice());
+                Log.Write($"USD: {StrategyStatistics.Snapshots.Last().Fiat} | Asset: {StrategyStatistics.Snapshots.Last().Security}", 1);
+                Log.Write($"Period PL: {StrategyStatistics.Snapshots.Last().PL} | Cumulative PL: {StrategyStatistics.Snapshots.Last().CumulativePL}", 1);
             }
         }
 

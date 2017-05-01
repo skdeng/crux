@@ -2,7 +2,6 @@
 using Newtonsoft.Json.Linq;
 using QuickFix;
 using QuickFix.Fields;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -132,8 +131,7 @@ namespace Crux.OkcoinFIX
             OrderSubmitCallback = callback;
             var request = OKTradingRequest.CreateNewOrderRequest(volume, price, side, type);
             CurrentSession.Send(request);
-            Log.Write($"Submit {(side == Side.BUY ? "BUY" : "SELL")} order: {volume} at {price.ToString("N3")}$", 1);
-            return new Order()
+            var order = new Order()
             {
                 Price = price,
                 Volume = volume,
@@ -142,11 +140,8 @@ namespace Crux.OkcoinFIX
                 ClientOrderID = request.GetInt(Tags.ClOrdID),
                 Time = request.GetDateTime(Tags.TransactTime)
             };
-        }
-
-        public bool Tick()
-        {
-            throw new NotImplementedException();
+            Log.Write($"Submit {order}", 2);
+            return order;
         }
 
         public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
@@ -175,7 +170,7 @@ namespace Crux.OkcoinFIX
                 Log.Write($"Got the wrong number of historical prices. Asked: {numPeriods} | Received: {data.Count}", 0);
             }
 
-            return data.Select(d => new Candle((double)d[1], (double)d[4], (double)d[2], (double)d[3]));
+            return data.Select(d => new Candle((double)d[1], (double)d[4], (double)d[2], (double)d[3], timespan));
         }
 
         /// <summary>
@@ -275,16 +270,17 @@ namespace Crux.OkcoinFIX
                         // New order execution report
                         string avgPrice = msg.GetString(Tags.AvgPx);
                         char side = msg.GetChar(Tags.Side);
-                        CurrentOrders.Add(new Order()
+                        var order = new Order()
                         {
                             OrderID = msg.GetString(Tags.ExecID),
                             ClientOrderID = clientOrderID,
                             Price = double.Parse(avgPrice),
                             Side = side
-                        });
+                        };
+                        CurrentOrders.Add(order);
                         OrderSubmitCallback?.Invoke(false);
                         OrderSubmitCallback = null;
-                        Log.Write($"New {(side.Equals(Side.BUY) ? "BUY" : "SELL")} order placed", 1);
+                        Log.Write($"Submission confirmed {order}", 2);
                         break;
                     }
                 case ExecType.PARTIAL_FILL:
@@ -295,8 +291,9 @@ namespace Crux.OkcoinFIX
                         char side = msg.GetChar(Tags.Side);
 
                         double remainingQty = (double)msg.GetDecimal(Tags.LeavesQty);
-                        CurrentOrders.First(o => o.ClientOrderID == clientOrderID).Volume = remainingQty;
-                        Log.Write($"{(side.Equals(Side.BUY) ? "BUY" : "SELL")} order partially filled ({(double)msg.GetDecimal(Tags.CumQty)}/{remainingQty}) at {executionPrice}", 1);
+                        var order = CurrentOrders.First(o => o.ClientOrderID == clientOrderID);
+                        order.FilledVolume = order.Volume - remainingQty;
+                        Log.Write($"Partial fill {order}", 2);
                         break;
                     }
                 case ExecType.FILL:
@@ -305,8 +302,9 @@ namespace Crux.OkcoinFIX
                         double executionPrice = (double)msg.GetDecimal(Tags.AvgPx);
                         int orderStatus = msg.GetInt(Tags.OrdStatus);
                         char side = msg.GetChar(Tags.Side);
-                        CurrentOrders.RemoveAll(o => o.ClientOrderID == clientOrderID);
-                        Log.Write($"{(side.Equals(Side.BUY) ? "BUY" : "SELL")} order filled {msg.GetDecimal(Tags.CumQty)} at {executionPrice}", 1);
+                        var order = CurrentOrders.First(o => o.ClientOrderID == clientOrderID);
+                        CurrentOrders.Remove(order);
+                        Log.Write($"Fill {order}", 2);
                         break;
                     }
 
@@ -355,7 +353,7 @@ namespace Crux.OkcoinFIX
         {
             OrderCancelCallback?.Invoke(true);
             OrderCancelCallback = null;
-            Log.Write($"Order cancel error: {msg.GetString(Tags.Text)}", 0);
+            Log.Write($"Order cancel error: {msg.GetString(Tags.Text)}", 1);
         }
 
         /// <summary>
