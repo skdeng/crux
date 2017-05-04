@@ -1,15 +1,24 @@
 # Project Crux
 Cryptocurrency Algorithmic Trading Framework in C#
 
-### Sub-Projects
-#### BackTest
-Contains HistoricalDataAPI which implements the same interface as other market APIs. This allows us to pass it to any trading strategies and evaluate its performance on past price data.
-
 ### Requirements (all libraries can be downloaded from NuGet)
 - Visual Studio 2015
 - [QuickFIX API](http://quickfixn.org/)
 - [WebSocket4Net](http://websocket4net.codeplex.com/)
 - [Newtonsoft.Json](http://www.newtonsoft.com/json)
+
+### Sub-Projects
+#### BackTest
+Contains HistoricalDataAPI which implements the same interface as other market APIs. This allows us to pass it to any trading strategies and evaluate its performance on past price data.
+#### CruxTest
+Unit test project for Crux project
+
+### Sub-Folders
+__Scripts__
+MATLAB and Python scripts used to quickly backtest simple strategy ideas
+
+__Data__
+Historical data files (not uploaded due to large size), data processing scripts, 
 
 ### Exchanges
 __Exchange classes must implement MarketAPI interface__
@@ -23,10 +32,3 @@ The programm currently supports the following exchanges:
 ### Trading Algorithms/Strategies
 __Strategies must inherit the TradeStrategy abstract class__
 For obvious reasons, strategies are not included
-
-### Sub-Folders
-__Scripts__
-MATLAB and Python scripts used to quickly backtest simple strategy ideas
-
-__Data__
-Historical data files (not uploaded due to large size), data processing scripts, 
