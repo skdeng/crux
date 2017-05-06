@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace Crux
 {
@@ -11,6 +12,10 @@ namespace Crux
     public class Statistics
     {
         public List<PortfolioSnapshot> Snapshots { get; private set; }
+
+        public SnapshotCallback SnapshotCallback { get; set; } = null;
+
+        public event EventHandler<PortfolioSnapshot> SnapshotEvent;
 
         private double? CachedSharpeRatio { get; set; }
 
@@ -25,10 +30,26 @@ namespace Crux
             return Snapshots.Last().CumulativePL;
         }
 
+        public void Import(string logFilename)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(List<PortfolioSnapshot>));
+            StreamReader file = new StreamReader(logFilename);
+            Snapshots = (List<PortfolioSnapshot>)serializer.Deserialize(file);
+            file.Close();
+        }
+
         public void Export(string logFilename)
         {
-            var lines = Snapshots.Select(snapshot => $"{snapshot.Time.ToString("yy/MM/dd hh:mm")},{snapshot.Fiat},{snapshot.Security},{snapshot.SecurityPrice},{snapshot.PortfolioValue}, {snapshot.PL},{snapshot.CumulativePL},{snapshot.BenchmarkPL},{snapshot.BenchmarkCumulativePL}");
-            File.WriteAllLines(logFilename, lines);
+            XmlSerializer serializer = new XmlSerializer(typeof(List<PortfolioSnapshot>));
+            StreamWriter file = new StreamWriter(logFilename);
+            serializer.Serialize(file, Snapshots);
+            file.Flush();
+            file.Close();
+        }
+
+        public void Clear()
+        {
+            Snapshots.Clear();
         }
 
         public double SharpeRatio()
@@ -47,7 +68,7 @@ namespace Crux
         {
             double portfolioValue = fiat + security * securityPrice;
             bool hasOne = Snapshots.Count > 0;
-            Snapshots.Add(new PortfolioSnapshot()
+            var newSnapshot = new PortfolioSnapshot()
             {
                 Time = DateTime.Now,
                 Fiat = fiat,
@@ -58,8 +79,10 @@ namespace Crux
                 CumulativePL = hasOne ? portfolioValue / Snapshots.First().PortfolioValue - 1 : 0.0,
                 BenchmarkPL = hasOne ? securityPrice / Snapshots.Last().SecurityPrice - 1 : 0.0,
                 BenchmarkCumulativePL = hasOne ? securityPrice / Snapshots.First().SecurityPrice - 1 : 0.0
-            });
-
+            };
+            Snapshots.Add(newSnapshot);
+            SnapshotCallback?.Invoke(newSnapshot);
+            SnapshotEvent(this, newSnapshot);
             CachedSharpeRatio = null;
         }
 
@@ -87,4 +110,6 @@ namespace Crux
         public double BenchmarkPL { get; set; }
         public double BenchmarkCumulativePL { get; set; }
     }
+
+    public delegate void SnapshotCallback(PortfolioSnapshot snapshot);
 }

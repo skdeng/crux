@@ -1,0 +1,122 @@
+﻿<Window x:Class="CruxGUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CruxGUI"
+        mc:Ignorable="d"
+        Background="WhiteSmoke"
+        Title="Project Southern Cross" Height="720" Width="1500"
+        Closing="Window_Closing">
+    <DockPanel>
+
+        <Menu DockPanel.Dock="Top" Background="WhiteSmoke">
+            <MenuItem Header="File">
+                <MenuItem Header="Change Statistics File" Click="ChangeStatisticsFile_Click"/>
+                <MenuItem Header="Clear Statistics" Click="ClearStatistics_Click"/>
+            </MenuItem>
+
+            <MenuItem Header="Settings">
+                <MenuItem Header="Console Log Level">
+                    <MenuItem x:Name="MenuItemLogLevel0" Header="0 - Error Only" IsCheckable="True" local:MenuItemExtensions.GroupName="LogLevelGroup" Checked="MenuItemLogLevel0_Checked"/>
+                    <MenuItem x:Name="MenuItemLogLevel1" Header="1 - Important" IsCheckable="True" local:MenuItemExtensions.GroupName="LogLevelGroup" Checked="MenuItemLogLevel1_Checked"/>
+                    <MenuItem x:Name="MenuItemLogLevel2" Header="2 - Normal" IsCheckable="True" local:MenuItemExtensions.GroupName="LogLevelGroup" Checked="MenuItemLogLevel2_Checked"/>
+                    <MenuItem x:Name="MenuItemLogLevel3" Header="3 - Debug" IsCheckable="True" local:MenuItemExtensions.GroupName="LogLevelGroup" Checked="MenuItemLogLevel3_Checked"/>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <Grid DockPanel.Dock="Bottom" Background="WhiteSmoke" Height="20">
+        </Grid>
+
+        <Grid
+            DockPanel.Dock="Left"
+            Width="200"
+            Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid 
+                x:Name="StatusPanel"
+                Grid.Row="0" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Text="Status Panel" FontWeight="Bold" Height="Auto"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Total Portfolio Value: " />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PortfolioValue, StringFormat={}{0:N3}}" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Fiat: " />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PortfolioFiat, StringFormat={}{0:N3}}" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Asset: " />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding PortfolioAsset, StringFormat={}{0:N4}}" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Asset Price: "/>
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding AssetPrice, StringFormat={}{0:N3}}" HorizontalAlignment="Right"/>
+            </Grid>
+
+            <StackPanel
+                Grid.Row="1"
+                VerticalAlignment="Bottom">
+                <TextBlock Text="Market APIs" FontWeight="Bold"/>
+                <ListBox
+                    x:Name="MarketListBox"
+                    Background="WhiteSmoke"
+                    ItemsSource="{Binding MarketAPIList}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch">
+                </ListBox>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                    <TextBlock Text="Trade Symbol: " FontWeight="Bold"/>
+                    <TextBox Text="{Binding TradeSymbol, Mode=TwoWay}" HorizontalAlignment="Stretch" Width="100"/>
+                </StackPanel>
+            </StackPanel>
+
+            <ToggleButton 
+                x:Name="StartButton"
+                Grid.Row="2"
+                Checked="StartButton_Checked"
+                Unchecked="StartButton_Unchecked"
+                VerticalAlignment="Bottom" 
+                Height="50"
+                Background="LightCyan" Grid.ColumnSpan="2">
+                <TextBlock Text="{Binding StartButtonText}"/>
+            </ToggleButton>
+        </Grid>
+
+        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition MinWidth="600"/>
+            </Grid.ColumnDefinitions>
+
+            <local:PLGraph 
+                x:Name="PLGraphController" 
+                Grid.Column="0"
+                Background="WhiteSmoke"/>
+
+            <GridSplitter Grid.Column="1" Grid.ColumnSpan="1" ResizeDirection="Columns" Height="Auto" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="1" Background="DarkGray"/>
+
+            <local:GUIConsole 
+                x:Name="GUIConsoleController" 
+                Grid.Column="2" />
+
+        </Grid>
+
+    </DockPanel>
+</Window>

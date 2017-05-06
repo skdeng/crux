@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Crux.Bfx
+namespace Crux.BfxWS
 {
     [DataContract]
     class AuthMessage : EventMessage

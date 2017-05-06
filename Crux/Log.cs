@@ -14,6 +14,8 @@ namespace Crux
         /// </summary>
         public static int LogLevel = 3;
 
+        public static ILogStream LogStream = new ConsoleLogStream();
+
         private static string _LogExportFile;
         public static string LogExportFile
         {
@@ -40,33 +42,9 @@ namespace Crux
         {
             if (level <= LogLevel)
             {
-                switch (level)
-                {
-                    case 0:
-                        {
-                            var prevColor = Console.ForegroundColor;
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(msg);
-                            Console.ForegroundColor = prevColor;
-                            break;
-                        }
-                    case 1:
-                        {
-                            var prevColor = Console.ForegroundColor;
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine(msg);
-                            Console.ForegroundColor = prevColor;
-                            break;
-                        }
-                    case 2:
-                    case 3:
-                        {
-                            Console.WriteLine(msg);
-                            break;
-                        }
-                }
-
-                FileWriter?.WriteLine($"[{level}] [{DateTime.Now}] {msg}");
+                var formatMsg = $"[{level}] [{DateTime.Now.ToString("yy/MM/dd hh:mm:ss")}] {msg}";
+                LogStream.Write(formatMsg, level);
+                FileWriter?.WriteLineAsync(formatMsg);
             }
         }
     }

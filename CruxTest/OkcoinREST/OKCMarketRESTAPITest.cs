@@ -17,5 +17,14 @@ namespace CruxTest.OkcoinREST
                 Trace.WriteLine(o);
             }
         }
+
+        [TestMethod]
+        public void GetOrderBookTest()
+        {
+            OKCMarketRESTAPI api = new OKCMarketRESTAPI("../../../Keys/okc.txt", "LTC/USD");
+            var orderbook = api.GetOrderBook();
+            Trace.WriteLine($"{orderbook.BestBid.Price} {orderbook.BestBid.Volume}");
+            Trace.WriteLine($"{orderbook.BestOffer.Price} {orderbook.BestOffer.Volume}");
+        }
     }
 }

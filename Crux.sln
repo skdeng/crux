@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CruxUnitTest", "CruxTest\Cr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackTest", "BackTest\BackTest.csproj", "{31076037-D4A2-4891-99AC-1129B7B35EA0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CruxGUI", "CruxGUI\CruxGUI.csproj", "{7E93BD5E-CFB1-4F6D-A412-07B994844095}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{31076037-D4A2-4891-99AC-1129B7B35EA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31076037-D4A2-4891-99AC-1129B7B35EA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31076037-D4A2-4891-99AC-1129B7B35EA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E93BD5E-CFB1-4F6D-A412-07B994844095}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E93BD5E-CFB1-4F6D-A412-07B994844095}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E93BD5E-CFB1-4F6D-A412-07B994844095}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E93BD5E-CFB1-4F6D-A412-07B994844095}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

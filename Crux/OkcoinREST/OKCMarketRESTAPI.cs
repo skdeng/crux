@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Crux.OkcoinREST
 {
-    public class OKCMarketRESTAPI : MarketAPI
+    public class OKCMarketRESTAPI : IMarketAPI
     {
         private string TradeSymbol;
         private string TradeSymbolString;
@@ -239,7 +239,6 @@ namespace Crux.OkcoinREST
             Order order = null;
             if (result)
             {
-                Log.Write($"Submit {order}", 2);
                 order = new Order()
                 {
                     Price = price,
@@ -250,6 +249,7 @@ namespace Crux.OkcoinREST
                     OrderID = response["order_id"].ToString(),
                     ClientOrderID = (int)response["order_id"]
                 };
+                Log.Write($"Submit {order}", 2);
             }
             else
             {
