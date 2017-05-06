@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Crux.Bfx
+namespace Crux.BfxWS
 {
     [DataContract]
     class NewOrderMessage : WebsocketMessage

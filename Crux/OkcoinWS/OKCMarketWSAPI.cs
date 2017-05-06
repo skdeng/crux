@@ -11,7 +11,7 @@ using WebSocket4Net;
 
 namespace Crux.OkcoinWS
 {
-    class OKCMarketWSAPI : MarketAPI
+    public class OKCMarketWSAPI : IMarketAPI
     {
         private string TradeSymbol;
 

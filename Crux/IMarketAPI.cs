@@ -12,7 +12,7 @@ namespace Crux
         ONE_DAY = 1440
     }
 
-    public interface MarketAPI
+    public interface IMarketAPI
     {
         /// <summary>
         /// Cancel all active orders
@@ -21,7 +21,7 @@ namespace Crux
 
         /// <summary>
         /// Cancel a given order, does nothing if the order is already cancelled or filled or does not exist
-        /// Operation does not have to be async but callback must execute after the cancellation has been confirmed or rejected by the exchange
+        /// Operation can be sync or async but callback must execute after the cancellation has been confirmed or rejected by the exchange
         /// </summary>
         /// <param name="order">Order to be cancelled</param>
         /// <param name="callback">Optional callback to execute after the order has been cancelled</param>
@@ -61,7 +61,7 @@ namespace Crux
 
         /// <summary>
         /// Submit a new order
-        /// Operation does not have to be async but callback must execute after the submission is confirmed or rejected by the exchange
+        /// Operation can be sync or async but callback must execute after the submission is confirmed or rejected by the exchange
         /// </summary>
         /// <param name="price">Price of the order</param>
         /// <param name="volume">Amount of security to trade</param>
@@ -76,8 +76,21 @@ namespace Crux
         /// </summary>
         /// <param name="timespan">Time spam of either period</param>
         /// <param name="numPeriods">Number of periods</param>
-        /// <returns></returns>
+        /// <returns>Series of candlestick data</returns>
         IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods);
+    }
+
+    /// <summary>
+    /// An enumeration of all finished market APIs
+    /// Used by UI to display possible choices of market APIs
+    /// Enumeration names are used as-is, with underscores replaced by spaces
+    /// </summary>
+    public enum EMarketAPI
+    {
+        Bitfinex_Websocket,
+        Okcoin_FIX,
+        Okcoin_REST,
+        Okcoin_Websocket,
     }
 
     /// <summary>

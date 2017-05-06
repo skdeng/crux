@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace BackTest
 {
-    class HistoricalDataAPI : MarketAPI
+    class HistoricalDataAPI : IMarketAPI
     {
         private int CurrentTick;
 
@@ -166,7 +166,7 @@ namespace BackTest
 
         public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
         {
-            throw new NotImplementedException();
+            return Enumerable.Empty<Candle>();
         }
 
         private void ExecuteOrder(double volume, char side)

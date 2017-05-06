@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Crux.Bfx
+namespace Crux.BfxWS
 {
     abstract class EventMessage : WebsocketMessage
     {

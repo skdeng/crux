@@ -12,6 +12,21 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,6 +51,10 @@
     <DocumentationFile>
     </DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -49,6 +68,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -64,7 +85,7 @@
   <ItemGroup>
     <Compile Include="BasicStrategy\MomentumStrategy.cs" />
     <Compile Include="Bfx\AuthMessage.cs" />
-    <Compile Include="Bfx\BfxMarketAPI.cs" />
+    <Compile Include="Bfx\BfxMarketWSAPI.cs" />
     <Compile Include="Bfx\WebsocketMessage.cs" />
     <Compile Include="Bfx\CancelGroupOrderMessage.cs" />
     <Compile Include="Bfx\CancelOrderMessage.cs" />
@@ -72,6 +93,8 @@
     <Compile Include="Bfx\InfoMessage.cs" />
     <Compile Include="Bfx\NewOrderMessage.cs" />
     <Compile Include="Bfx\SubscribeMessage.cs" />
+    <Compile Include="ConsoleLogStream.cs" />
+    <Compile Include="ILogStream.cs" />
     <Compile Include="OkcoinREST\OKCMarketRESTAPI.cs" />
     <Compile Include="OkcoinWS\CancelOrderMessage.cs" />
     <Compile Include="OkcoinWS\NewOrderMessage.cs" />
@@ -93,7 +116,7 @@
     <Compile Include="Statistics.cs" />
     <Compile Include="Candle.cs" />
     <Compile Include="Extend.cs" />
-    <Compile Include="MarketAPI.cs" />
+    <Compile Include="IMarketAPI.cs" />
     <Compile Include="OrderBook.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="OkcoinFIX\OKCMarketFIXAPI.cs" />
@@ -118,6 +141,18 @@
     <Content Include="config\FIX44.xml">
       <SubType>Designer</SubType>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

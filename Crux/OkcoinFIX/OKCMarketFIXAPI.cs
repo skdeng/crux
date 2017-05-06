@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Crux.OkcoinFIX
 {
-    class OKCMarketFIXAPI : MessageCracker, IApplication, MarketAPI
+    public class OKCMarketFIXAPI : MessageCracker, IApplication, IMarketAPI
     {
         private Session CurrentSession;
 

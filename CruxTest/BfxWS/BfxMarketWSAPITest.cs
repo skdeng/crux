@@ -1,18 +1,18 @@
-﻿using Crux.Bfx;
+﻿using Crux.BfxWS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuickFix.Fields;
 using System.Diagnostics;
 using System.Threading;
 
-namespace CruxTest.Bfx
+namespace CruxTest.BfxWS
 {
     [TestClass]
-    public class BfxMarketAPITest
+    public class BfxMarketWSAPITest
     {
         [TestMethod]
         public void Connection()
         {
-            BfxMarketAPI api = new BfxMarketAPI("../../../Keys/bfx.txt", "BTC");
+            BfxMarketWSAPI api = new BfxMarketWSAPI("../../../Keys/bfx.txt", "BTC");
             Thread.Sleep(1000);
             var fiatBalance = api.GetBalanceFiat();
             var securityBalance = api.GetBalanceSecurity();
@@ -32,7 +32,7 @@ namespace CruxTest.Bfx
         [TestMethod]
         public void NewOrder()
         {
-            BfxMarketAPI api = new BfxMarketAPI("../../../Keys/bfx.txt", "BTC");
+            BfxMarketWSAPI api = new BfxMarketWSAPI("../../../Keys/bfx.txt", "BTC");
             Thread.Sleep(1000);
             api.SubmitOrder(1000, 0.01, Side.BUY, OrdType.LIMIT);
 
@@ -44,7 +44,7 @@ namespace CruxTest.Bfx
         [TestMethod]
         public void QueryOrders()
         {
-            BfxMarketAPI api = new BfxMarketAPI("../../../Keys/bfx.txt", "BTC");
+            BfxMarketWSAPI api = new BfxMarketWSAPI("../../../Keys/bfx.txt", "BTC");
             Thread.Sleep(1000);
             var orders = api.GetActiveOrders();
 

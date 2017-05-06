@@ -6,9 +6,9 @@ using System.IO;
 using System.Linq;
 using WebSocket4Net;
 
-namespace Crux.Bfx
+namespace Crux.BfxWS
 {
-    public class BfxMarketAPI : MarketAPI
+    public class BfxMarketWSAPI : IMarketAPI
     {
         private static string ConnectionString = "wss://api.bitfinex.com/ws/2";
 
@@ -33,7 +33,7 @@ namespace Crux.Bfx
         private OrderOperationCallback OrderSubmitCallback;
         private OrderOperationCallback OrderCancelCallback;
 
-        public BfxMarketAPI(string keyFile, string symbol)
+        public BfxMarketWSAPI(string keyFile, string symbol)
         {
             KeyFileName = keyFile;
             ChannelID = new Dictionary<string, int>();

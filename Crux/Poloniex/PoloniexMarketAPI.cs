@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Crux.Poloniex
 {
-    class PoloniexMarketAPI : MarketAPI
+    class PoloniexMarketAPI : IMarketAPI
     {
         public void CancelAllOrders()
         {
