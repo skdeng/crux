@@ -28,6 +28,8 @@ namespace CruxGUI
 
         public void SetStatistics(Statistics strategyStats)
         {
+            PLGraphModel.StrategyPL.Values.Clear();
+            PLGraphModel.BenchmarkPL.Values.Clear();
             strategyStats.SnapshotEvent += delegate (object sender, PortfolioSnapshot snapshot)
             {
                 AddPL(snapshot.CumulativePL, snapshot.BenchmarkCumulativePL, snapshot.Time);

@@ -65,6 +65,13 @@ namespace CruxGUI
                 MainWindowViewModel.PortfolioAsset = snapshot.Security;
                 MainWindowViewModel.AssetPrice = snapshot.SecurityPrice;
             }
+            else
+            {
+                MainWindowViewModel.PortfolioValue = 0;
+                MainWindowViewModel.PortfolioFiat = 0;
+                MainWindowViewModel.PortfolioAsset = 0;
+                MainWindowViewModel.AssetPrice = 0;
+            }
             StrategyStatistics.SnapshotEvent += delegate (object sender, PortfolioSnapshot snapshot)
             {
                 MainWindowViewModel.PortfolioValue = snapshot.PortfolioValue;
@@ -174,11 +181,26 @@ namespace CruxGUI
             Log.LogLevel = ((ListBox)sender).SelectedIndex;
         }
 
-        private void ChangeStatisticsFile_Click(object sender, RoutedEventArgs e)
+        private void NewStatisticsFile_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog fileDialog = new SaveFileDialog();
+            fileDialog.AddExtension = true;
+            fileDialog.DefaultExt = ".log";
+            fileDialog.Filter = "Log file (.log)|*.log";
+
+            var result = fileDialog.ShowDialog();
+            if (result == true)
+            {
+                StatisticsLogFile = fileDialog.FileName;
+                LoadStatisticsFile();
+            }
+        }
+
+        private void OpenStatisticsFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.DefaultExt = ".txt";
-            fileDialog.Filter = "Text documents (.txt)|*.txt";
+            fileDialog.DefaultExt = ".log";
+            fileDialog.Filter = "Log file (.log)|*.log";
 
             var result = fileDialog.ShowDialog();
             if (result == true)

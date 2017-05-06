@@ -12,7 +12,8 @@
 
         <Menu DockPanel.Dock="Top" Background="WhiteSmoke">
             <MenuItem Header="File">
-                <MenuItem Header="Change Statistics File" Click="ChangeStatisticsFile_Click"/>
+                <MenuItem Header="New Statistics" Click="NewStatisticsFile_Click"/>
+                <MenuItem Header="Open Statistics" Click="OpenStatisticsFile_Click"/>
                 <MenuItem Header="Clear Statistics" Click="ClearStatistics_Click"/>
             </MenuItem>
 
