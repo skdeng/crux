@@ -14,6 +14,7 @@
             <MenuItem Header="File">
                 <MenuItem Header="New Statistics" Click="NewStatisticsFile_Click"/>
                 <MenuItem Header="Open Statistics" Click="OpenStatisticsFile_Click"/>
+                <MenuItem Header="Save Statistics" Click="SaveStatisticsFile_Click" />
                 <MenuItem Header="Clear Statistics" Click="ClearStatistics_Click"/>
             </MenuItem>
 

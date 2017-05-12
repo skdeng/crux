@@ -1,5 +1,6 @@
 ﻿using Crux;
 using Crux.BasicStrategy;
+using Crux.BfxREST;
 using Crux.BfxWS;
 using Crux.OkcoinFIX;
 using Crux.OkcoinREST;
@@ -8,6 +9,7 @@ using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -46,6 +48,9 @@ namespace CruxGUI
             // Set market list
             MarketListBox.Items.Clear();
             MainWindowViewModel.MarketAPIList = Enum.GetNames(typeof(EMarketAPI)).Select(s => s.Replace("_", " "));
+
+            // Default log level 2
+            MenuItemLogLevel2.IsChecked = true;
         }
 
         private void LoadStatisticsFile()
@@ -105,12 +110,12 @@ namespace CruxGUI
                 return;
             }
 
+            Thread.Sleep(1000);
             // Setup Trade Strategy
             if (Strategy == null)
             {
-                Strategy = new MeanReversalStrategy(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 12, StrategyStatistics);
+                Strategy = new MeanReversalStrategy(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 24, StrategyStatistics);
             }
-
             Strategy.Start(true);
             MarketListBox.IsEnabled = false;
         }
@@ -131,6 +136,8 @@ namespace CruxGUI
             var selectedEnum = (EMarketAPI)Enum.Parse(typeof(EMarketAPI), selected.Replace(" ", "_"));
             switch (selectedEnum)
             {
+                case EMarketAPI.Bitfinex_REST:
+                    return new BfxMarketRESTAPI(MarketKeyFile, MainWindowViewModel.TradeSymbol);
                 case EMarketAPI.Bitfinex_Websocket:
                     return new BfxMarketWSAPI(MarketKeyFile, MainWindowViewModel.TradeSymbol);
                 case EMarketAPI.Okcoin_FIX:
@@ -164,6 +171,12 @@ namespace CruxGUI
 
         private void StartButton_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (Strategy == null || !Strategy.Trading)
+            {
+                MainWindowViewModel.StartButtonText = "Start Strategy";
+                return;
+            }
+
             var result = MessageBox.Show(this, "Stop current strategy?", "Stop Current Strategy", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes)
             {
@@ -208,6 +221,11 @@ namespace CruxGUI
                 StatisticsLogFile = fileDialog.FileName;
                 LoadStatisticsFile();
             }
+        }
+
+        private void SaveStatisticsFile_Click(object sender, RoutedEventArgs e)
+        {
+            StrategyStatistics.Export(StatisticsLogFile);
         }
 
         private void ClearStatistics_Click(object sender, RoutedEventArgs e)

@@ -50,7 +50,7 @@ namespace Crux
         /// <summary>
         /// Get the price of the last trade
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Price of the last trade, negative number if operation failed</returns>
         double GetLastPrice();
 
         /// <summary>
@@ -87,6 +87,7 @@ namespace Crux
     /// </summary>
     public enum EMarketAPI
     {
+        Bitfinex_REST,
         Bitfinex_Websocket,
         Okcoin_FIX,
         Okcoin_REST,

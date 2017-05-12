@@ -6,7 +6,7 @@ namespace Crux.BfxWS
     class CancelOrderMessage : WebsocketMessage
     {
         [DataMember(Name = "id")]
-        public int ID { get; set; }
+        public long ID { get; set; }
 
         [DataMember(Name = "cid_date")]
         public string Date { get; set; }

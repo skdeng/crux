@@ -306,7 +306,8 @@ namespace Crux.OkcoinWS
                     {
                         case -1:    // cancelled
                         case 2:     // filled
-                            CurrentOrders.RemoveAll(o => o.OrderID.Equals(dataArray[i]["data"]["orderId"]));
+                            CurrentOrders.First(o => o.OrderID.Equals(dataArray[i]["data"]["orderId"])).FilledVolume = (double)dataArray[i]["data"]["completedTradeAmount"];
+                            //CurrentOrders.RemoveAll(o => o.OrderID.Equals(dataArray[i]["data"]["orderId"]));
                             break;
                         case 1:     // partial fill
                             CurrentOrders.First(o => o.OrderID.Equals(dataArray[i]["data"]["orderId"])).FilledVolume = (double)dataArray[i]["data"]["completedTradeAmount"];
