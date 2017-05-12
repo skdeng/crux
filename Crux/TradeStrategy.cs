@@ -12,9 +12,9 @@ namespace Crux
 
         public double PortfolioValue { get { return MarketTerminal.GetBalanceFiat() + MarketTerminal.GetBalanceSecurity() * MarketTerminal.GetLastPrice(); } }
 
-        protected IMarketAPI MarketTerminal { get; set; }
-
         public bool Trading { get; protected set; }
+
+        protected IMarketAPI MarketTerminal { get; set; }
 
         private Thread TradeThread { get; set; }
 
@@ -63,7 +63,7 @@ namespace Crux
             {
                 LogThread.Abort();
             }
-            else
+            else if (LogThread.ThreadState == ThreadState.Running)
             {
                 LogThread.Join();
             }
@@ -74,6 +74,14 @@ namespace Crux
             while (Trading)
             {
                 Trade();
+                //try
+                //{
+                //    Trade();
+                //}
+                //catch (Exception e)
+                //{
+                //    Log.Write($"General exception: {e}", 0);
+                //}
             }
         }
 

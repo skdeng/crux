@@ -84,15 +84,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicStrategy\MomentumStrategy.cs" />
-    <Compile Include="Bfx\AuthMessage.cs" />
-    <Compile Include="Bfx\BfxMarketWSAPI.cs" />
-    <Compile Include="Bfx\WebsocketMessage.cs" />
-    <Compile Include="Bfx\CancelGroupOrderMessage.cs" />
-    <Compile Include="Bfx\CancelOrderMessage.cs" />
-    <Compile Include="Bfx\EventMessage.cs" />
-    <Compile Include="Bfx\InfoMessage.cs" />
-    <Compile Include="Bfx\NewOrderMessage.cs" />
-    <Compile Include="Bfx\SubscribeMessage.cs" />
+    <Compile Include="BfxREST\BfxMarketRESTAPI.cs" />
+    <Compile Include="BfxWS\AuthMessage.cs" />
+    <Compile Include="BfxWS\BfxMarketWSAPI.cs" />
+    <Compile Include="BfxWS\WebsocketMessage.cs" />
+    <Compile Include="BfxWS\CancelGroupOrderMessage.cs" />
+    <Compile Include="BfxWS\CancelOrderMessage.cs" />
+    <Compile Include="BfxWS\EventMessage.cs" />
+    <Compile Include="BfxWS\InfoMessage.cs" />
+    <Compile Include="BfxWS\NewOrderMessage.cs" />
+    <Compile Include="BfxWS\SubscribeMessage.cs" />
     <Compile Include="ConsoleLogStream.cs" />
     <Compile Include="ILogStream.cs" />
     <Compile Include="OkcoinREST\OKCMarketRESTAPI.cs" />

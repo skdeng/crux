@@ -303,7 +303,8 @@ namespace Crux.OkcoinFIX
                         int orderStatus = msg.GetInt(Tags.OrdStatus);
                         char side = msg.GetChar(Tags.Side);
                         var order = CurrentOrders.First(o => o.ClientOrderID == clientOrderID);
-                        CurrentOrders.Remove(order);
+                        order.FilledVolume = order.Volume;
+                        //CurrentOrders.Remove(order);
                         Log.Write($"Fill {order}", 2);
                         break;
                     }

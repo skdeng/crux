@@ -1,6 +1,9 @@
 ﻿using Crux;
 using LiveCharts.Defaults;
 using System;
+using System.Linq;
+using System.Threading;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace CruxGUI
@@ -10,8 +13,9 @@ namespace CruxGUI
     /// </summary>
     public partial class PLGraph : UserControl
     {
-        PLGraphVM PLGraphModel;
-
+        private PLGraphVM PLGraphModel;
+        private LiveCharts.ChartPoint Selected = null;
+        private Statistics StrategyStatistics;
         /// <summary>
         /// One data point every hour
         /// </summary>
@@ -28,6 +32,8 @@ namespace CruxGUI
 
         public void SetStatistics(Statistics strategyStats)
         {
+            StrategyStatistics = strategyStats;
+
             PLGraphModel.StrategyPL.Values.Clear();
             PLGraphModel.BenchmarkPL.Values.Clear();
             strategyStats.SnapshotEvent += delegate (object sender, PortfolioSnapshot snapshot)
@@ -53,6 +59,46 @@ namespace CruxGUI
         public void Clear()
         {
             PLGraphModel.Clear();
+        }
+
+        private void PLChart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
+        {
+            if (Selected != null)
+            {
+                new Thread(new ThreadStart(delegate
+                {
+                    var firstTime = Math.Min(chartPoint.X, Selected.X);
+                    var secondTime = Math.Max(chartPoint.X, Selected.X);
+
+                    var firstSnapshotIndex = StrategyStatistics.Snapshots.FindIndex(s => s.Time.Ticks == firstTime);
+                    var secondSnapshotIndex = StrategyStatistics.Snapshots.FindIndex(s => s.Time.Ticks == secondTime);
+                    var firstSnapshot = StrategyStatistics.Snapshots[firstSnapshotIndex];
+                    var secondSnapshot = StrategyStatistics.Snapshots[secondSnapshotIndex];
+
+                    var selectedSnapshots = StrategyStatistics.Snapshots.GetRange(firstSnapshotIndex, secondSnapshotIndex - firstSnapshotIndex + 1);
+                    var avgTime = 0;
+                    for (int i = firstSnapshotIndex; i < secondSnapshotIndex; i++)
+                    {
+                        avgTime += (int)(StrategyStatistics.Snapshots[i + 1].Time - StrategyStatistics.Snapshots[i].Time).TotalSeconds;
+                    }
+                    avgTime /= (secondSnapshotIndex - firstSnapshotIndex);
+                    var periodsPerYear = (int)(TimeSpan.FromDays(365).TotalSeconds / avgTime);
+                    var sharpeRatio = Statistics.SharpeRatio(periodsPerYear, StrategyStatistics.Snapshots.Select(s => s.PL), StrategyStatistics.Snapshots.Select(s => s.BenchmarkPL));
+
+                    var relativePL = (1 + secondSnapshot.CumulativePL) / (1 + firstSnapshot.CumulativePL) - 1;
+                    var relativeBenchmarkPL = (1 + secondSnapshot.BenchmarkCumulativePL) / (1 + firstSnapshot.BenchmarkCumulativePL) - 1;
+                    var absolutePL = secondSnapshot.PortfolioValue - firstSnapshot.PortfolioValue;
+
+                    string infoString = $"Relative Strategy PL: {relativePL}\nRelative Benchmark PL: {relativeBenchmarkPL}\nPortfolio Value Change: {absolutePL}\nSharpe Ratio: {sharpeRatio}";
+                    MessageBox.Show(infoString, "Relative information", MessageBoxButton.OK, MessageBoxImage.Information);
+                })).Start();
+
+                Selected = null;
+            }
+            else
+            {
+                Selected = chartPoint;
+            }
         }
     }
 }

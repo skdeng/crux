@@ -18,6 +18,7 @@
         Margin="10"
         Zoom="X"
         TooltipTimeout="0"
+        DataClick="PLChart_DataClick"
         >
 
         <lvc:CartesianChart.AxisX>

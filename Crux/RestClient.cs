@@ -59,7 +59,7 @@ namespace Crux
             return MakeRequest("");
         }
 
-        public string MakeRequest(string parameters)
+        public string MakeRequest(string parameters, string[] headers = null, bool retry = true, int retryRemaining = 10)
         {
             var request = (HttpWebRequest)WebRequest.Create(EndPoint + parameters);
 
@@ -78,7 +78,13 @@ namespace Crux
                     writeStream.Write(bytes, 0, bytes.Length);
                 }
             }
-
+            if (headers != null)
+            {
+                foreach (var h in headers)
+                {
+                    request.Headers.Add(h);
+                }
+            }
             try
             {
                 using (var response = (HttpWebResponse)request.GetResponse())
@@ -104,11 +110,18 @@ namespace Crux
                     return responseValue;
                 }
             }
-            catch (Exception e)
+            catch (WebException e) when (retry && retryRemaining > 0)
+            {
+                Log.Write("Web exception", 0);
+                Log.Write($"Status code: {(e.Response as HttpWebResponse).StatusCode}", 0);
+                Log.Write($"Status description: {(e.Response as HttpWebResponse).StatusDescription}", 0);
+                return MakeRequest(parameters, headers, retry, retryRemaining - 1);
+            }
+            catch (Exception e) when (retry && retryRemaining > 0)
             {
                 Log.Write(e.Message, 0);
                 Log.Write(e.StackTrace, 0);
-                return MakeRequest(parameters);
+                return MakeRequest(parameters, headers, retry, retryRemaining - 1);
             }
         }
     }

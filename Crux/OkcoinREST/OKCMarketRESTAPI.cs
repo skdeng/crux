@@ -23,6 +23,7 @@ namespace Crux.OkcoinREST
         private double BalanceBTC;
         private double BalanceLTC;
         private DateTime BalanceLastUpdate;
+        private TimeSpan BalanceCacheTime = TimeSpan.FromSeconds(5);
 
         /// <summary>
         /// 
@@ -36,7 +37,7 @@ namespace Crux.OkcoinREST
             SecretKey = lines[1];
 
             TradeSymbol = symbol;
-            TradeSymbolString = TradeSymbol.Contains("LTC") ? "ltc_usd" : "btc_usd";
+            TradeSymbolString = TradeSymbol.ToLower().Contains("ltc") ? "ltc_usd" : "btc_usd";
         }
 
         public void CancelAllOrders()
@@ -114,7 +115,7 @@ namespace Crux.OkcoinREST
 
         public double GetBalanceFiat()
         {
-            if ((DateTime.Now - BalanceLastUpdate).TotalSeconds > 5)
+            if ((DateTime.Now - BalanceLastUpdate) > BalanceCacheTime)
             {
                 GetBalance();
             }
@@ -123,11 +124,11 @@ namespace Crux.OkcoinREST
 
         public double GetBalanceSecurity()
         {
-            if ((DateTime.Now - BalanceLastUpdate).TotalSeconds > 5)
+            if ((DateTime.Now - BalanceLastUpdate) > BalanceCacheTime)
             {
                 GetBalance();
             }
-            return TradeSymbol.Contains("LTC") ? BalanceLTC : BalanceBTC;
+            return TradeSymbolString.Equals("ltc_usd") ? BalanceLTC : BalanceBTC;
         }
 
         private void GetBalance()
@@ -152,7 +153,6 @@ namespace Crux.OkcoinREST
         {
             string endPoint = "https://www.okcoin.com/api/v1/kline.do";
             var client = new RestClient(endPoint, RestClient.HttpVerb.GET);
-            string symbol = TradeSymbol.Contains("LTC") ? "ltc_usd" : "btc_usd";
             string type;
             switch (timespan)
             {
@@ -167,7 +167,7 @@ namespace Crux.OkcoinREST
                     type = "1day";
                     break;
             }
-            var json = client.MakeRequest($"?symbol={symbol}&type={type}&size={numPeriods}");
+            var json = client.MakeRequest($"?symbol={TradeSymbolString}&type={type}&size={numPeriods}");
             var data = (JArray)JsonConvert.DeserializeObject(json);
             if (data.Count != numPeriods)
             {
@@ -247,7 +247,7 @@ namespace Crux.OkcoinREST
                     Side = side,
                     OrderType = type,
                     OrderID = response["order_id"].ToString(),
-                    ClientOrderID = (int)response["order_id"]
+                    ClientOrderID = (long)response["order_id"]
                 };
                 Log.Write($"Submit {order}", 2);
             }

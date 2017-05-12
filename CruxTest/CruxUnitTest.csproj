@@ -56,11 +56,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="BfxREST\BfxMarketRESTAPITest.cs" />
     <Compile Include="BfxWS\BfxMarketWSAPITest.cs" />
     <Compile Include="OkcoinREST\OKCMarketRESTAPITest.cs" />
     <Compile Include="OrderBookTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatisticsTest.cs" />
+    <Compile Include="TraceLogStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Crux\Crux.csproj">

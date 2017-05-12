@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using QuickFix.Fields;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -117,14 +118,37 @@ namespace Crux.BfxWS
                 Side = side,
                 OrderType = type,
                 Time = DateTime.Now,
-                ClientOrderID = (int)subOrderMsg.ClientID
+                ClientOrderID = (long)subOrderMsg.ClientID
             };
             return order;
         }
 
         public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
         {
-            return Enumerable.Empty<Candle>();
+            string timeFrameString;
+            switch (timespan)
+            {
+                case TimePeriod.ONE_MIN:
+                    timeFrameString = "1m";
+                    break;
+                default:
+                case TimePeriod.ONE_HOUR:
+                    timeFrameString = "1h";
+                    break;
+                case TimePeriod.ONE_DAY:
+                    timeFrameString = "1D";
+                    break;
+            }
+            string endPoint = $"https://api.bitfinex.com/v2/candles/trade:{timeFrameString}:{TradeSymbol}/hist";
+            var client = new RestClient(endPoint, RestClient.HttpVerb.GET);
+            var json = client.MakeRequest($"?limit={numPeriods}");
+            var data = (JArray)JsonConvert.DeserializeObject(json);
+            if (data.Count != numPeriods)
+            {
+                Log.Write($"Got the wrong number of historical prices. Asked: {numPeriods} | Received: {data.Count}", 0);
+            }
+
+            return data.Select(d => new Candle((double)d[1], (double)d[2], (double)d[3], (double)d[4], timespan));
         }
 
         private void SocketTerminal_OnMessageReceived(object sender, MessageReceivedEventArgs e)
@@ -183,19 +207,29 @@ namespace Crux.BfxWS
                     {
                         var order = new Order()
                         {
-                            OrderID = dataArray[0].ToString(),
-                            ClientOrderID = (int)dataArray[2],
-                            Time = (DateTime)dataArray[4],
-                            Volume = Math.Abs((double)dataArray[6]),
-
+                            OrderID = dataArray[2][0].ToString(),
+                            ClientOrderID = (int)dataArray[2][2],
+                            Time = (DateTime)dataArray[2][4],
+                            Volume = Math.Abs((double)dataArray[2][7]),
+                            FilledVolume = Math.Abs((double)dataArray[2][6]),
+                            Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
+                            OrderType = dataArray[2][8].ToString().Equals("LIMIT", StringComparison.OrdinalIgnoreCase) ? OrdType.LIMIT : OrdType.MARKET
                         };
+                        CurrentOrders.Add(order);
                         OrderSubmitCallback?.Invoke(false);
                         OrderSubmitCallback = null;
+                        Log.Write($"Submitted {order}", 2);
                     }
                     else if (msgType.Equals("oc")) // cancel order confirmation
                     {
+                        string orderId = dataArray[2][0].ToString();
+                        var order = CurrentOrders.Find(o => o.OrderID == orderId);
+                        CurrentOrders.Remove(order);
+                        // TODO
                         OrderCancelCallback?.Invoke(false);
                         OrderCancelCallback = null;
+
+                        Log.Write($"Cancelled {order}", 2);
                     }
                 }
                 else if (channelID == ChannelID["trades"])
@@ -209,7 +243,7 @@ namespace Crux.BfxWS
                             Volume = (double)dataArray[2][2]
                         };
                     }
-                    else if (!msgType.Equals("tu")) //snapshot
+                    else if (msgType.Equals("tu")) //snapshot
                     {
                         var trades = dataArray[1];
                         var lastTrade = trades.First;

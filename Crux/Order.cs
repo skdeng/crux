@@ -4,7 +4,7 @@ namespace Crux
 {
     public class Order : IEquatable<Order>
     {
-        public int ClientOrderID { get; set; }
+        public long ClientOrderID { get; set; }
         public string OrderID { get; set; }
         public double Price { get; set; }
         public char Side { get; set; }
