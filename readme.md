@@ -30,14 +30,15 @@ __Data__
 Historical data files (not uploaded due to large size), data processing scripts, 
 
 ### Exchanges
-__Exchange classes must implement MarketAPI interface__
+__Exchange classes must implement IMarketAPI interface__
 
 The programm currently supports the following exchanges:
 - [OKCoin International REST API](https://www.okcoin.com/rest_getStarted.html)
 - [OKCoin International Websocket API](https://www.okcoin.com/ws_getStarted.html)
 - [OKCoin International FIX API](https://www.okcoin.com/about/fix_getStarted.html)
 - [Bitfinex Websocket API 2.0](https://bitfinex.readme.io/v2/docs/ws-general)
+- [Bitfinex REST API 1.1](https://bitfinex.readme.io/v1/docs/rest-general)
 
 ### Trading Algorithms/Strategies
-__Strategies must inherit the TradeStrategy abstract class__
-For obvious reasons, strategies are not included
+__Strategies must inherit from the TradeStrategy abstract class__
+Strategies are not included in the repository
