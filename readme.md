@@ -12,9 +12,10 @@ Graphical interface for project Crux, using WPF and Model-View-ViewModel pattern
 
 ### Requirements (all libraries can be downloaded from NuGet)
 - Visual Studio 2015
-- [QuickFIX API](http://quickfixn.org/)
-- [WebSocket4Net](http://websocket4net.codeplex.com/)
+- [QuickFIX API](http://quickfixn.org)
+- [WebSocket4Net](http://websocket4net.codeplex.com)
 - [Newtonsoft.Json](http://www.newtonsoft.com/json)
+- [Live Charts](https://lvcharts.net)
 
 ### Sub-Projects
 #### BackTest
