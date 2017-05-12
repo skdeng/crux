@@ -12,7 +12,7 @@ namespace BackTest
         {
             HistoricalDataAPI historicalAPI = new HistoricalDataAPI("../../../data/polo_LTC_USD1hour.csv", 100, 1, 0.005);
             Statistics stats = new Statistics();
-            TradeStrategy meanReversal = new MeanReversalStrategy(historicalAPI, TimeSpan.FromSeconds(0), TimePeriod.ONE_HOUR, 72, stats);
+            TradeStrategy meanReversal = new ModifiedMR(historicalAPI, TimeSpan.FromSeconds(0), TimePeriod.ONE_HOUR, 72, stats);
             meanReversal.Start(false);
 
             double assetPL = historicalAPI.HistoricalPrices.Last() / historicalAPI.HistoricalPrices.First();

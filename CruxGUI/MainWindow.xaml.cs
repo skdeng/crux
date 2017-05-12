@@ -117,7 +117,7 @@ namespace CruxGUI
             // Setup Trade Strategy
             if (Strategy == null)
             {
-                Strategy = new MeanReversalStrategy(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 24, StrategyStatistics);
+                Strategy = new ModifiedMR(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 24, StrategyStatistics);
             }
             Strategy.Start(true);
             MarketListBox.IsEnabled = false;

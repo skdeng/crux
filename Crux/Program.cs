@@ -12,7 +12,7 @@ namespace Crux
             Log.LogLevel = 3;
             var okcAPI = new OKCMarketRESTAPI("../../../Keys/okc.txt", "LTC/USD");
             Statistics stats = new Statistics();
-            MeanReversalStrategy meanReversalStrategy = new MeanReversalStrategy(okcAPI, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 12, stats);
+            ModifiedMR meanReversalStrategy = new ModifiedMR(okcAPI, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 12, stats);
             meanReversalStrategy.Start(false);
         }
     }

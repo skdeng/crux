@@ -75,15 +75,14 @@ namespace Crux
         {
             while (Trading)
             {
-                Trade();
-                //try
-                //{
-                //    Trade();
-                //}
-                //catch (Exception e)
-                //{
-                //    Log.Write($"General exception: {e}", 0);
-                //}
+                try
+                {
+                    Trade();
+                }
+                catch (Exception e)
+                {
+                    Log.Write($"General exception: {e}", 0);
+                }
             }
         }
 
