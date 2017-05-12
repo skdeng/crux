@@ -69,6 +69,7 @@ namespace CruxGUI
                 MainWindowViewModel.PortfolioFiat = snapshot.Fiat;
                 MainWindowViewModel.PortfolioAsset = snapshot.Security;
                 MainWindowViewModel.AssetPrice = snapshot.SecurityPrice;
+                MainWindowViewModel.BenchmarkPrice = snapshot.BenchmarkPrice;
             }
             else
             {
@@ -76,6 +77,7 @@ namespace CruxGUI
                 MainWindowViewModel.PortfolioFiat = 0;
                 MainWindowViewModel.PortfolioAsset = 0;
                 MainWindowViewModel.AssetPrice = 0;
+                MainWindowViewModel.BenchmarkPrice = 0;
             }
             StrategyStatistics.SnapshotEvent += delegate (object sender, PortfolioSnapshot snapshot)
             {
@@ -83,6 +85,7 @@ namespace CruxGUI
                 MainWindowViewModel.PortfolioFiat = snapshot.Fiat;
                 MainWindowViewModel.PortfolioAsset = snapshot.Security;
                 MainWindowViewModel.AssetPrice = snapshot.SecurityPrice;
+                MainWindowViewModel.BenchmarkPrice = snapshot.BenchmarkPrice;
             };
         }
 
