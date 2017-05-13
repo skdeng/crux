@@ -27,13 +27,13 @@ namespace BackTest
 
         private Mutex OrderLock { get; set; }
 
-        public HistoricalDataAPI(string historicalDataFile, double startingUSD, double startingBTC, double transactionCost)
+        public HistoricalDataAPI(string historicalDataFile, double initialFiat, double initialAsset, double transactionCost)
         {
             HistoricalPrices = new List<double>();
             CurrentTick = 0;
             CurrentOrders = new List<Order>();
-            BalanceFiat = startingUSD;
-            BalanceSecurity = startingBTC;
+            BalanceFiat = initialFiat;
+            BalanceSecurity = initialAsset;
             TransactionCost = transactionCost;
 
             ReadDateFile(historicalDataFile);

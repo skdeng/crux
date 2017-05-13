@@ -42,7 +42,7 @@ namespace Crux.BfxWS
             CurrentOrders = new List<Order>();
 
             Symbol = symbol;
-            TradeSymbol = $"t{Symbol}USD";
+            TradeSymbol = $"t{symbol.ToUpper()}USD";
 
             SocketTerminal = new WebSocket(ConnectionString);
             SocketTerminal.Opened += SocketTerminal_OnOpen;

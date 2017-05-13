@@ -13,8 +13,6 @@ namespace Crux
     {
         public List<PortfolioSnapshot> Snapshots { get; private set; }
 
-        public SnapshotCallback SnapshotCallback { get; set; } = null;
-
         public event EventHandler<PortfolioSnapshot> SnapshotEvent;
 
         private double? CachedSharpeRatio { get; set; }
@@ -64,8 +62,13 @@ namespace Crux
             return CachedSharpeRatio.Value;
         }
 
-        public void Snapshot(double fiat, double security, double securityPrice)
+        public void Snapshot(double fiat, double security, double securityPrice, double benchmarkPrice = 0)
         {
+            if (benchmarkPrice == 0)
+            {
+                benchmarkPrice = securityPrice;
+            }
+
             double portfolioValue = fiat + security * securityPrice;
             bool hasOne = Snapshots.Count > 0;
             var newSnapshot = new PortfolioSnapshot()
@@ -77,12 +80,12 @@ namespace Crux
                 PortfolioValue = portfolioValue,
                 PL = Snapshots.Count > 0 ? portfolioValue / Snapshots.Last().PortfolioValue - 1 : 0.0,
                 CumulativePL = hasOne ? portfolioValue / Snapshots.First().PortfolioValue - 1 : 0.0,
-                BenchmarkPL = hasOne ? securityPrice / Snapshots.Last().SecurityPrice - 1 : 0.0,
-                BenchmarkCumulativePL = hasOne ? securityPrice / Snapshots.First().SecurityPrice - 1 : 0.0
+                BenchmarkPrice = benchmarkPrice,
+                BenchmarkPL = hasOne ? benchmarkPrice / Snapshots.Last().BenchmarkPrice - 1 : 0.0,
+                BenchmarkCumulativePL = hasOne ? benchmarkPrice / Snapshots.First().BenchmarkPrice - 1 : 0.0
             };
             Snapshots.Add(newSnapshot);
-            SnapshotCallback?.Invoke(newSnapshot);
-            SnapshotEvent(this, newSnapshot);
+            SnapshotEvent?.Invoke(this, newSnapshot);
             CachedSharpeRatio = null;
         }
 
@@ -107,9 +110,8 @@ namespace Crux
         public double PortfolioValue { get; set; }
         public double PL { get; set; }
         public double CumulativePL { get; set; }
+        public double BenchmarkPrice { get; set; }
         public double BenchmarkPL { get; set; }
         public double BenchmarkCumulativePL { get; set; }
     }
-
-    public delegate void SnapshotCallback(PortfolioSnapshot snapshot);
 }

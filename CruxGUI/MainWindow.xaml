@@ -50,6 +50,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -67,6 +68,9 @@
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Asset Price: "/>
                 <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding AssetPrice, StringFormat={}{0:N3}}" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Coinbase Price: "/>
+                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding BenchmarkPrice, StringFormat={}{0:N3}}" HorizontalAlignment="Right"/>
             </Grid>
 
             <StackPanel

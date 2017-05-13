@@ -83,6 +83,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdvanceStrategy\KStrategy.cs" />
     <Compile Include="BasicStrategy\MomentumStrategy.cs" />
     <Compile Include="BfxREST\BfxMarketRESTAPI.cs" />
     <Compile Include="BfxWS\AuthMessage.cs" />
@@ -113,7 +114,7 @@
     <Compile Include="OkcoinFIX\AccReqID.cs" />
     <Compile Include="BasicStrategy\AbsoluteMeanReversalStrategy.cs" />
     <Compile Include="BasicStrategy\MarketMaker.cs" />
-    <Compile Include="BasicStrategy\MeanReversalStrategy.cs" />
+    <Compile Include="BasicStrategy\ModifiedMR.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="Candle.cs" />
     <Compile Include="Extend.cs" />

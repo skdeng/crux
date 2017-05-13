@@ -46,6 +46,13 @@ namespace CruxGUI
             set { _AssetPrice = value; OnPropertyChanged("AssetPrice"); }
         }
 
+        private double _BenchmarkPrice;
+        public double BenchmarkPrice
+        {
+            get { return _BenchmarkPrice; }
+            set { _BenchmarkPrice = value; OnPropertyChanged("BenchmarkPrice"); }
+        }
+
         private IEnumerable<string> _MarketAPIList;
         public IEnumerable<string> MarketAPIList
         {

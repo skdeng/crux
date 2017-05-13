@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Linq;
 using System.Threading;
 
@@ -73,15 +75,14 @@ namespace Crux
         {
             while (Trading)
             {
-                Trade();
-                //try
-                //{
-                //    Trade();
-                //}
-                //catch (Exception e)
-                //{
-                //    Log.Write($"General exception: {e}", 0);
-                //}
+                try
+                {
+                    Trade();
+                }
+                catch (Exception e)
+                {
+                    Log.Write($"General exception: {e}", 0);
+                }
             }
         }
 
@@ -94,12 +95,23 @@ namespace Crux
                 {
                     Thread.Sleep(waitTime);
                 }
-                StrategyStatistics.Snapshot(MarketTerminal.GetBalanceFiat(), MarketTerminal.GetBalanceSecurity(), MarketTerminal.GetLastPrice());
+                StrategyStatistics.Snapshot(MarketTerminal.GetBalanceFiat(), MarketTerminal.GetBalanceSecurity(), MarketTerminal.GetLastPrice(), GetCoinbaseBTCPrice());
                 Log.Write($"USD: {StrategyStatistics.Snapshots.Last().Fiat.ToString("N5")} | Asset: {StrategyStatistics.Snapshots.Last().Security}", 1);
                 Log.Write($"Period PL: {StrategyStatistics.Snapshots.Last().PL.ToString("N5")} | Cumulative PL: {StrategyStatistics.Snapshots.Last().CumulativePL.ToString("N5")}", 1);
                 LastStatTime = DateTime.Now;
             }
 
+        }
+
+        private double GetCoinbaseBTCPrice()
+        {
+            string endPoint = "https://api.coinbase.com/v2/exchange-rates";
+            var client = new RestClient(endPoint, RestClient.HttpVerb.GET);
+
+            var json = client.MakeRequest("?currency=BTC");
+            var data = (JObject)JsonConvert.DeserializeObject(json);
+
+            return (double)data["data"]["rates"]["USD"];
         }
 
         protected abstract void Trade();

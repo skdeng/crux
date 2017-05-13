@@ -50,7 +50,7 @@ namespace CruxGUI
             MainWindowViewModel.MarketAPIList = Enum.GetNames(typeof(EMarketAPI)).Select(s => s.Replace("_", " "));
 
             // Default log level 2
-            MenuItemLogLevel2.IsChecked = true;
+            MenuItemLogLevel3.IsChecked = true;
         }
 
         private void LoadStatisticsFile()
@@ -69,6 +69,7 @@ namespace CruxGUI
                 MainWindowViewModel.PortfolioFiat = snapshot.Fiat;
                 MainWindowViewModel.PortfolioAsset = snapshot.Security;
                 MainWindowViewModel.AssetPrice = snapshot.SecurityPrice;
+                MainWindowViewModel.BenchmarkPrice = snapshot.BenchmarkPrice;
             }
             else
             {
@@ -76,6 +77,7 @@ namespace CruxGUI
                 MainWindowViewModel.PortfolioFiat = 0;
                 MainWindowViewModel.PortfolioAsset = 0;
                 MainWindowViewModel.AssetPrice = 0;
+                MainWindowViewModel.BenchmarkPrice = 0;
             }
             StrategyStatistics.SnapshotEvent += delegate (object sender, PortfolioSnapshot snapshot)
             {
@@ -83,6 +85,7 @@ namespace CruxGUI
                 MainWindowViewModel.PortfolioFiat = snapshot.Fiat;
                 MainWindowViewModel.PortfolioAsset = snapshot.Security;
                 MainWindowViewModel.AssetPrice = snapshot.SecurityPrice;
+                MainWindowViewModel.BenchmarkPrice = snapshot.BenchmarkPrice;
             };
         }
 
@@ -114,9 +117,9 @@ namespace CruxGUI
             // Setup Trade Strategy
             if (Strategy == null)
             {
-                Strategy = new MeanReversalStrategy(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 24, StrategyStatistics);
+                Strategy = new ModifiedMR(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 48, StrategyStatistics);
             }
-            Strategy.Start(true);
+            //Strategy.Start(true);
             MarketListBox.IsEnabled = false;
         }
 
