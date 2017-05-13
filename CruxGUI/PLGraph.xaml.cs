@@ -82,7 +82,7 @@ namespace CruxGUI
                 }
                 avgTime /= (secondSnapshotIndex - firstSnapshotIndex);
                 var periodsPerYear = (int)(TimeSpan.FromDays(365).TotalSeconds / avgTime);
-                var sharpeRatio = Statistics.SharpeRatio(periodsPerYear, StrategyStatistics.Snapshots.Select(s => s.PL), StrategyStatistics.Snapshots.Select(s => s.BenchmarkPL));
+                var sharpeRatio = Statistics.SharpeRatio(periodsPerYear, selectedSnapshots.Select(s => s.PL), selectedSnapshots.Select(s => s.BenchmarkPL));
 
                 var relativePL = (1 + secondSnapshot.CumulativePL) / (1 + firstSnapshot.CumulativePL) - 1;
                 var relativeBenchmarkPL = (1 + secondSnapshot.BenchmarkCumulativePL) / (1 + firstSnapshot.BenchmarkCumulativePL) - 1;

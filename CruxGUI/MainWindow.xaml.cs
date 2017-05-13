@@ -50,7 +50,7 @@ namespace CruxGUI
             MainWindowViewModel.MarketAPIList = Enum.GetNames(typeof(EMarketAPI)).Select(s => s.Replace("_", " "));
 
             // Default log level 2
-            MenuItemLogLevel2.IsChecked = true;
+            MenuItemLogLevel3.IsChecked = true;
         }
 
         private void LoadStatisticsFile()
@@ -117,9 +117,9 @@ namespace CruxGUI
             // Setup Trade Strategy
             if (Strategy == null)
             {
-                Strategy = new ModifiedMR(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 24, StrategyStatistics);
+                Strategy = new ModifiedMR(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 48, StrategyStatistics);
             }
-            Strategy.Start(true);
+            //Strategy.Start(true);
             MarketListBox.IsEnabled = false;
         }
 

@@ -85,7 +85,7 @@ namespace Crux
                 BenchmarkCumulativePL = hasOne ? benchmarkPrice / Snapshots.First().BenchmarkPrice - 1 : 0.0
             };
             Snapshots.Add(newSnapshot);
-            SnapshotEvent(this, newSnapshot);
+            SnapshotEvent?.Invoke(this, newSnapshot);
             CachedSharpeRatio = null;
         }
 

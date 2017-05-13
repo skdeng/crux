@@ -1,37 +1,54 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import math
+import numpy as np
 
 file = open("../data/polo_LTC_USD1hour.csv")
 lines = file.readlines()
 file.close()
 
 price = [float(l.split(',')[1]) for l in lines]
-price = price[11000:]
 
 pl = []
 apl = []
 trade = []
 
 FRICTION = 0.005
-MA_LAG = 48
-ma = [0 if i < MA_LAG-1 else np.average(price[i-MA_LAG+1:i+1]) for i in range(len(price))]
+MA_LAG = 72
 mstd = [0 if i < MA_LAG-1 else np.std(price[i-MA_LAG+1:i+1]) for i in range(len(price))]
+kval = []
 
 usd = 100
-btc = 100
+btc = 1
 
 start_value = usd + btc * price[MA_LAG-1]
 
 walusd = []
 walbtc = []
 
+class kalman():
+	def __init__(self):
+		self.p = 1.0
+		self.q = 1e-7
+		self.r = 0.01
+		self.x = 0.0
+
+		self.k = 0
+
+	def m_update(self):
+		self.k = (self.p+self.q)/(self.p+self.q+self.r)
+		# print (k)
+		self.p = self.r*(self.p+self.q)/(self.r+self.p+self.q)
+
+	def update(self, i):
+		self.m_update()
+		self.x = self.x + (i-self.x)*self.k
+		return self.x
+k = kalman()
+
 np.seterr(all='raise')
 
 for i in range(MA_LAG-1, len(price)):
-	mstd[i] = max(mstd[i], 0.001)
-
-	z = -(price[i] - ma[i]) / mstd[i]
+	kval.append(k.update(price[i]))
+	z = -(price[i] - kval[-1]) / mstd[i]
 
 	val = usd + btc * price[i]
 
@@ -53,7 +70,6 @@ for i in range(MA_LAG-1, len(price)):
 	walusd.append(usd)
 	walbtc.append(btc)
 
-
 val = usd + btc * price[-1]
 print ("Total: {}".format(val))
 print ("USD: {}".format(usd))
@@ -61,20 +77,23 @@ print ("BTC: {}".format(btc))
 print ("Final PL: {}".format(val / start_value))
 print ("Asset PL: {}".format(price[-1] / price[MA_LAG-1]))
 
-plt.plot(pl, label='Strategy P/L MA:{}'.format(MA_LAG))
-plt.plot(apl, label='Asset P/L')
+
+total_val = [walusd[i] + walbtc[i] * price[MA_LAG-1+i] / 100 for i in range(len(walusd))]
+
+# plt.plot(pl, label='Strategy P/L MA:{}'.format(MA_LAG))
+# plt.plot(apl, label='Asset P/L')
 # plt.plot(walusd)
 # plt.plot(walbtc)
 
-# trade = np.array(trade)
-# price = np.array(price[MA_LAG-1:])
-# buys = np.where(trade == 0)[0]
-# sells = np.where(trade == 1)[0]
+trade = np.array(trade)
+price = np.array(price[MA_LAG-1:])
+buys = np.where(trade == 0)[0]
+sells = np.where(trade == 1)[0]
 
-# plt.plot(price)
-# plt.plot(ma[MA_LAG-1:])
-# plt.scatter(buys, price[buys], c='green')
-# plt.scatter(sells, price[sells], c='red')
+plt.plot(price)
+plt.plot(kval)
+plt.scatter(buys, price[buys], c='green')
+plt.scatter(sells, price[sells], c='red')
 
 plt.legend(loc='upper left')
 plt.show()
