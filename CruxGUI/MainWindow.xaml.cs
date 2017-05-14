@@ -112,20 +112,28 @@ namespace CruxGUI
                 StartButton.IsChecked = false;
                 return;
             }
-
-            Thread.Sleep(1000);
-            // Setup Trade Strategy
-            if (Strategy == null)
+            StartButton.IsEnabled = false;
+            new Thread(new ThreadStart(delegate
             {
+                while (!MarketTerminal.IsReady()) ;
+                // Setup Trade Strategy
                 Strategy = new ModifiedMR(MarketTerminal, TimeSpan.FromMinutes(15), TimePeriod.ONE_HOUR, 48, StrategyStatistics);
-            }
-            //Strategy.Start(true);
+                Strategy.Start(true);
+                App.Current.Dispatcher.Invoke(delegate
+                {
+                    StartButton.IsEnabled = true;
+                });
+            })).Start();
+
             MarketListBox.IsEnabled = false;
         }
 
         private void StopTrading()
         {
             Strategy?.Stop();
+            Strategy = null;
+            MarketTerminal?.Close();
+            MarketTerminal = null;
             MarketListBox.IsEnabled = true;
         }
 

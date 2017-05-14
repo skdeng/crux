@@ -23,7 +23,7 @@ namespace Crux.BfxWS
         public AuthMessage(string apiKey, string secretKey)
         {
             Event = "auth";
-            Nonce = ((uint)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString();
+            Nonce = DateTime.Now.UnixTimestamp().ToString();
             AuthenticationPayload = "AUTH" + Nonce;
             var sig = new HMACSHA384(Encoding.Default.GetBytes(secretKey));
             AuthenticationSig = BitConverter.ToString(sig.ComputeHash(Encoding.Default.GetBytes(AuthenticationPayload))).Replace("-", string.Empty).ToLower();

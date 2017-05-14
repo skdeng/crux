@@ -73,6 +73,11 @@ namespace Crux.OkcoinREST
             callback?.Invoke(!(bool)response["result"]);
         }
 
+        public void Close()
+        {
+            // Nothing needs to be done
+        }
+
         public List<Order> GetActiveOrders(Order queryOrder = null)
         {
             string endPoint = "https://www.okcoin.com/api/v1/order_info.do";
@@ -212,6 +217,11 @@ namespace Crux.OkcoinREST
             }
 
             return orderBook;
+        }
+
+        public bool IsReady()
+        {
+            return true;
         }
 
         public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)

@@ -15,6 +15,11 @@ namespace Crux.Poloniex
             throw new NotImplementedException();
         }
 
+        public void Close()
+        {
+            throw new NotImplementedException();
+        }
+
         public List<Order> GetActiveOrders(Order queryOrder = null)
         {
             throw new NotImplementedException();
@@ -45,12 +50,12 @@ namespace Crux.Poloniex
             throw new NotImplementedException();
         }
 
-        public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)
+        public bool IsReady()
         {
             throw new NotImplementedException();
         }
 
-        public bool Tick()
+        public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)
         {
             throw new NotImplementedException();
         }

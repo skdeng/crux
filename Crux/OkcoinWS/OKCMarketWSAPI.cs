@@ -19,9 +19,9 @@ namespace Crux.OkcoinWS
         private readonly OrderBook CurrentOrderBook;
         private Trade LastTrade;
 
-        private double BalanceBTC;
-        private double BalanceLTC;
-        private double BalanceUSD;
+        private double BalanceBTC = -1;
+        private double BalanceLTC = -1;
+        private double BalanceUSD = -1;
 
         private WebSocket SocketTerminal;
         private string ConnectionString = "wss://real.okcoin.com:10440/websocket/okcoinapi";
@@ -75,6 +75,12 @@ namespace Crux.OkcoinWS
             var msg = JsonConvert.SerializeObject(new CancelOrderMessage(TradeSymbol, order.OrderID));
             SocketTerminal.Send(msg);
             Log.Write($"Cancel {order}", 2);
+        }
+
+        public void Close()
+        {
+            SocketTerminal.Close();
+            SocketTerminal.Dispose();
         }
 
         public List<Order> GetActiveOrders(Order queryOrder = null)
@@ -141,6 +147,16 @@ namespace Crux.OkcoinWS
         public OrderBook GetOrderBook()
         {
             return CurrentOrderBook;
+        }
+
+        public bool IsReady()
+        {
+            return SocketTerminal.State == WebSocketState.Open &&
+                   LastTrade != null &&
+                   CurrentOrderBook != null &&
+                   BalanceUSD >= 0 &&
+                   BalanceBTC >= 0 &&
+                   BalanceLTC >= 0;
         }
 
         public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)

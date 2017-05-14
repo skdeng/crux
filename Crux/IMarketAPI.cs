@@ -28,6 +28,11 @@ namespace Crux
         void CancelOrder(Order order, OrderOperationCallback callback = null);
 
         /// <summary>
+        /// Handles the necessary steps to shutdown the connection to the exchange
+        /// </summary>
+        void Close();
+
+        /// <summary>
         /// Get a list of active orders
         /// Alternatively, query the information about one single order
         /// </summary>
@@ -58,6 +63,13 @@ namespace Crux
         /// </summary>
         /// <returns>Latest order book</returns>
         OrderBook GetOrderBook();
+
+        /// <summary>
+        /// Check if the API is ready to be used
+        /// This is important to asynchronous APIs using Websocket or FIX
+        /// </summary>
+        /// <returns>true if the API is ready, false otherwise</returns>
+        bool IsReady();
 
         /// <summary>
         /// Submit a new order

@@ -88,6 +88,7 @@
     <Compile Include="BfxREST\BfxMarketRESTAPI.cs" />
     <Compile Include="BfxWS\AuthMessage.cs" />
     <Compile Include="BfxWS\BfxMarketWSAPI.cs" />
+    <Compile Include="BfxWS\SubOrderBookMessage.cs" />
     <Compile Include="BfxWS\WebsocketMessage.cs" />
     <Compile Include="BfxWS\CancelGroupOrderMessage.cs" />
     <Compile Include="BfxWS\CancelOrderMessage.cs" />
