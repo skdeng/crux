@@ -240,36 +240,45 @@ namespace Crux.BfxWS
                     }
                     else if (msgType.Equals("on"))  // new order confirmation
                     {
-                        var order = new Order()
+                        string symbol = dataArray[2][3].ToString();
+                        if (symbol.Equals(TradeSymbol))
                         {
-                            OrderID = dataArray[2][0].ToString(),
-                            ClientOrderID = (long)dataArray[2][2],
-                            Time = new DateTime(1970, 1, 1).AddMilliseconds((double)dataArray[2][4]),
-                            Volume = Math.Abs((double)dataArray[2][7]),
-                            FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]),
-                            Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
-                            OrderType = dataArray[2][8].ToString().Contains("LIMIT") ? OrdType.LIMIT : OrdType.MARKET
-                        };
-                        CurrentOrders.Add(order);
-                        OrderSubmitCallback?.Invoke(false);
-                        OrderSubmitCallback = null;
-                        Log.Write($"Submitted {order}", 2);
+                            var order = new Order()
+                            {
+                                OrderID = dataArray[2][0].ToString(),
+                                ClientOrderID = (long)dataArray[2][2],
+                                Price = (double)dataArray[2][16],
+                                Time = new DateTime(1970, 1, 1).AddMilliseconds((double)dataArray[2][4]),
+                                Volume = Math.Abs((double)dataArray[2][7]),
+                                FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]),
+                                Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
+                                OrderType = dataArray[2][8].ToString().Contains("LIMIT") ? OrdType.LIMIT : OrdType.MARKET
+                            };
+                            CurrentOrders.Add(order);
+                            OrderSubmitCallback?.Invoke(false);
+                            OrderSubmitCallback = null;
+                            Log.Write($"Submitted {order}", 2);
+                        }
                     }
                     else if (msgType.Equals("oc"))  // cancel order confirmation
                     {
-                        string orderId = dataArray[2][0].ToString();
-                        var order = CurrentOrders.FirstOrDefault(o => o.OrderID == orderId);
-                        if (order != null)
+                        string symbol = dataArray[2][3].ToString();
+                        if (symbol.Equals(TradeSymbol))
                         {
-                            CurrentOrders.Remove(order);
-                            OrderCancelCallback?.Invoke(false);
-                            OrderCancelCallback = null;
+                            string orderId = dataArray[2][0].ToString();
+                            var order = CurrentOrders.FirstOrDefault(o => o.OrderID.Equals(orderId));
+                            if (order != null)
+                            {
+                                CurrentOrders.Remove(order);
+                                OrderCancelCallback?.Invoke(false);
+                                OrderCancelCallback = null;
 
-                            Log.Write($"Cancelled {order}", 2);
-                        }
-                        else
-                        {
-                            Log.Write($"Received cancellation message about unregistered {order}", 0);
+                                Log.Write($"Cancelled {order}", 2);
+                            }
+                            else
+                            {
+                                Log.Write($"Received cancellation message about unregistered order{orderId}", 0);
+                            }
                         }
                     }
                     else if (msgType.Equals("os"))  // order info snapshot
@@ -277,9 +286,10 @@ namespace Crux.BfxWS
                         var orders = dataArray[2];
                         foreach (var order in orders)
                         {
+                            string symbol = order[3].ToString();
                             string orderId = order[0].ToString();
                             // If order is not yet registered locally
-                            if (!CurrentOrders.Any(o => o.OrderID.Equals(orderId)))
+                            if (symbol.Equals(TradeSymbol) && !CurrentOrders.Any(o => o.OrderID.Equals(orderId)))
                             {
                                 CurrentOrders.Add(new Order()
                                 {
@@ -297,8 +307,9 @@ namespace Crux.BfxWS
                     }
                     else if (msgType.Equals("ou"))  // order info update
                     {
+                        string symbol = dataArray[2][3].ToString();
                         string orderId = dataArray[2][0].ToString();
-                        if (!CurrentOrders.Any(o => o.OrderID.Equals(orderId)))
+                        if (symbol.Equals(TradeSymbol) && !CurrentOrders.Any(o => o.OrderID.Equals(orderId)))
                         {
                             var order = new Order()
                             {
@@ -314,15 +325,19 @@ namespace Crux.BfxWS
                     }
                     else if (msgType.Equals("tu"))  // trades
                     {
-                        string orderId = dataArray[2][3].ToString();
-                        var order = CurrentOrders.FirstOrDefault(o => o.OrderID.Equals(orderId));
-                        if (order != null)
+                        string symbol = dataArray[2][1].ToString();
+                        if (TradeSymbol.Contains(symbol))
                         {
-                            order.FilledVolume = (double)dataArray[2][4];
-                        }
-                        else
-                        {
-                            Log.Write($"Trade info about unregistered order", 1);
+                            string orderId = dataArray[2][3].ToString();
+                            var order = CurrentOrders.FirstOrDefault(o => o.OrderID.Equals(orderId));
+                            if (order != null)
+                            {
+                                order.FilledVolume = (double)dataArray[2][4];
+                            }
+                            else
+                            {
+                                Log.Write($"Trade info about unregistered order", 1);
+                            }
                         }
                     }
                     else if (msgType.Equals("n"))   // notification
@@ -344,6 +359,10 @@ namespace Crux.BfxWS
                         else if (status.Equals("FAILURE"))
                         {
                             Log.Write($"Failure: {dataArray[2][7].ToString()}", 0);
+                        }
+                        else if (status.Equals("SUCCESS"))
+                        {
+                            Log.Write($"Notification: {dataArray[2][7].ToString()}", 2);
                         }
                     }
                 }
