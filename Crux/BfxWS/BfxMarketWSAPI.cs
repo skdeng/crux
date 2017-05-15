@@ -62,15 +62,18 @@ namespace Crux.BfxWS
 
         public void CancelAllOrders()
         {
-            //var cancelGroupOrder = new CancelGroupOrderMessage();
-            //var cancelGroupOrderMsg = BuildRequestMsg(cancelGroupOrder, "oc_multi");
-            //Log.Write($"Cancel group order msg: {cancelGroupOrderMsg}", 3);
-            //SocketTerminal.Send(cancelGroupOrderMsg);
-
-            foreach (var order in CurrentOrders)
+            if (CurrentOrders.Count > 0)
             {
-                CancelOrder(order);
+                var cancelGroupOrder = new CancelGroupOrderMessage();
+                var cancelGroupOrderMsg = BuildRequestMsg(cancelGroupOrder, "oc_multi");
+                Log.Write($"Cancel group order msg: {cancelGroupOrderMsg}", 3);
+                SocketTerminal.Send(cancelGroupOrderMsg);
             }
+
+            //foreach (var order in CurrentOrders)
+            //{
+            //    CancelOrder(order);
+            //}
         }
 
         public void CancelOrder(Order order, OrderOperationCallback callback = null)
@@ -420,7 +423,7 @@ namespace Crux.BfxWS
                         int count = (int)dataArray[1][1];
                         if (count > 0)  // change bid
                         {
-                            CurrentOrderBook.ChangeOrder((double)dataArray[1][0], (double)dataArray[1][2], MDEntryType.BID);
+                            CurrentOrderBook.ChangeOrder((double)dataArray[1][0], (double)dataArray[1][2], (double)dataArray[1][2] > 0 ? MDEntryType.BID : MDEntryType.OFFER);
                         }
                         else // remove
                         {
