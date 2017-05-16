@@ -58,12 +58,6 @@ namespace Crux.OkcoinFIX
             TrackLiveTrade = livetrade;
         }
 
-        ~OKCMarketFIXAPI()
-        {
-            Initiator.Stop();
-            Initiator.Dispose();
-        }
-
         public void CancelAllOrders()
         {
             CurrentSession.Send(OKTradingRequest.CreateOrderMassStatusRequest());
@@ -80,6 +74,12 @@ namespace Crux.OkcoinFIX
             var request = OKTradingRequest.CreateOrderCancelRequest(order);
             CurrentSession.Send(request);
             Log.Write($"Cancel order {order.Volume} at {order.Price.ToString("N3")}", 1);
+        }
+
+        public void Close()
+        {
+            Initiator.Stop();
+            Initiator.Dispose();
         }
 
         public List<Order> GetActiveOrders(Order queryOrder = null)
@@ -126,6 +126,11 @@ namespace Crux.OkcoinFIX
             return CurrentOrderBook;
         }
 
+        public bool IsReady()
+        {
+            return LastTrade != null &&
+                   CurrentOrderBook != null;
+        }
         public Order SubmitOrder(double price, double volume, char side, char type, OrderOperationCallback callback = null)
         {
             OrderSubmitCallback = callback;

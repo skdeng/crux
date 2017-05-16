@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 
 namespace Crux
 {
@@ -115,12 +116,14 @@ namespace Crux
                 Log.Write("Web exception", 0);
                 Log.Write($"Status code: {(e.Response as HttpWebResponse).StatusCode}", 0);
                 Log.Write($"Status description: {(e.Response as HttpWebResponse).StatusDescription}", 0);
+                Thread.Sleep(2000);
                 return MakeRequest(parameters, headers, retry, retryRemaining - 1);
             }
             catch (Exception e) when (retry && retryRemaining > 0)
             {
                 Log.Write(e.Message, 0);
                 Log.Write(e.StackTrace, 0);
+                Thread.Sleep(2000);
                 return MakeRequest(parameters, headers, retry, retryRemaining - 1);
             }
         }

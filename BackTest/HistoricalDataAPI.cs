@@ -201,5 +201,15 @@ namespace BackTest
         {
             return (new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).AddMilliseconds(timestamp);
         }
+
+        public void Close()
+        {
+
+        }
+
+        public bool IsReady()
+        {
+            return true;
+        }
     }
 }

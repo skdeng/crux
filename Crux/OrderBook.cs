@@ -180,7 +180,7 @@ namespace Crux
                     if (current == null || current.Price != price)
                     {
                         Log.Write("Error: Trying to remove inexistant book order", 3);
-                        //OfferLock.ReleaseMutex();
+                        OfferLock.ReleaseMutex();
                         return;
                     }
                     prev.Next = current.Next;

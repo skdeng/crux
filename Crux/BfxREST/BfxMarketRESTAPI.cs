@@ -79,6 +79,11 @@ namespace Crux.BfxREST
             }
         }
 
+        public void Close()
+        {
+            // Nothing needs to be done for REST api
+        }
+
         public List<Order> GetActiveOrders(Order queryOrder = null)
         {
             string endPoint;
@@ -198,6 +203,11 @@ namespace Crux.BfxREST
             }
         }
 
+        public bool IsReady()
+        {
+            return true;
+        }
+
         public IEnumerable<Candle> GetHistoricalPrices(TimePeriod timespan, int numPeriods)
         {
             string timeFrameString;
@@ -223,7 +233,7 @@ namespace Crux.BfxREST
                 Log.Write($"Got the wrong number of historical prices. Asked: {numPeriods} | Received: {response.Count}", 0);
             }
 
-            return response.Select(d => new Candle((double)d[1], (double)d[2], (double)d[3], (double)d[4], timespan));
+            return response.Reverse().Select(d => new Candle((double)d[1], (double)d[2], (double)d[3], (double)d[4], timespan));
         }
 
         public double GetLastPrice()
@@ -309,7 +319,7 @@ namespace Crux.BfxREST
 
         public void BuildSignedMessage(string endPoint, string[] parameters, out string[] headers)
         {
-            var nonce = ((uint)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString();
+            var nonce = DateTime.UtcNow.UnixTimestamp().ToString();
             var paramString = $"{{\"request\":\"{endPoint}\",\"nonce\":\"{nonce}\"";
             foreach (var p in parameters)
             {

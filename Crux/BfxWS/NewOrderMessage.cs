@@ -7,23 +7,20 @@ namespace Crux.BfxWS
     [DataContract]
     class NewOrderMessage : WebsocketMessage
     {
-        private static uint _OrderID = 0;
-        private static uint FreeOrderID { get { return _OrderID++; } }
-
         [DataMember(Name = "gid")]
         public uint GroupID { get; set; }
 
         [DataMember(Name = "cid")]
-        public uint ClientID { get; set; }
+        public long ClientID { get; set; }
 
         [DataMember(Name = "type")]
         public string OrderType { get; set; }
 
         [DataMember(Name = "amount")]
-        public double Volume { get; set; }
+        public string Volume { get; set; }
 
         [DataMember(Name = "price")]
-        public double Price { get; set; }
+        public string Price { get; set; }
 
         [DataMember(Name = "symbol")]
         public string Symbol { get; set; }
@@ -34,23 +31,18 @@ namespace Crux.BfxWS
         public NewOrderMessage(string symbol, double price, double volume, char side, char type)
         {
             GroupID = 1;
-            ClientID = FreeOrderID;
+            ClientID = DateTime.Now.UnixTimestamp();
             if (type == OrdType.LIMIT)
             {
-                OrderType = "LIMIT";
-            }
-            else if (type == OrdType.MARKET)
-            {
-                OrderType = "MARKET";
+                OrderType = "EXCHANGE LIMIT";
             }
             else
             {
-                Log.Write($"Unknown order type {type}", 0);
-                throw new Exception();
+                OrderType = "EXCHANGE MARKET";
             }
 
-            Volume = side == Side.BUY ? volume : -volume;
-            Price = price;
+            Volume = side == Side.BUY ? volume.ToString() : (-volume).ToString();
+            Price = price.ToString();
             Symbol = symbol;
             Hidden = 0;
         }
