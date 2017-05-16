@@ -69,11 +69,6 @@ namespace Crux.BfxWS
                 Log.Write($"Cancel group order msg: {cancelGroupOrderMsg}", 3);
                 SocketTerminal.Send(cancelGroupOrderMsg);
             }
-
-            //foreach (var order in CurrentOrders)
-            //{
-            //    CancelOrder(order);
-            //}
         }
 
         public void CancelOrder(Order order, OrderOperationCallback callback = null)
