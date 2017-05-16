@@ -280,7 +280,19 @@ namespace Crux.BfxWS
                             }
                             else
                             {
-                                Log.Write($"Received cancellation message about unregistered order{orderId}", 0);
+                                // unregistered
+                                order = new Order()
+                                {
+                                    OrderID = dataArray[2][0].ToString(),
+                                    ClientOrderID = (long)dataArray[2][2],
+                                    Price = (double)dataArray[2][16],
+                                    Time = new DateTime(1970, 1, 1).AddMilliseconds((double)dataArray[2][4]),
+                                    Volume = Math.Abs((double)dataArray[2][7]),
+                                    FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]),
+                                    Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
+                                    OrderType = dataArray[2][8].ToString().Contains("LIMIT") ? OrdType.LIMIT : OrdType.MARKET
+                                };
+                                Log.Write($"Cancelled {orderId}", 0);
                             }
                         }
                     }
@@ -312,18 +324,28 @@ namespace Crux.BfxWS
                     {
                         string symbol = dataArray[2][3].ToString();
                         string orderId = dataArray[2][0].ToString();
-                        if (symbol.Equals(TradeSymbol) && !CurrentOrders.Any(o => o.OrderID.Equals(orderId)))
+                        if (symbol.Equals(TradeSymbol))
                         {
-                            var order = new Order()
+                            var order = CurrentOrders.FirstOrDefault(o => o.OrderID.Equals(orderId));
+                            if (order == null)
                             {
-                                OrderID = dataArray[2][0].ToString(),
-                                ClientOrderID = (int)dataArray[2][2],
-                                Time = new DateTime(1970, 1, 1).AddMilliseconds((double)dataArray[2][4]),
-                                Volume = Math.Abs((double)dataArray[2][7]),
-                                FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]),
-                                Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
-                                OrderType = dataArray[2][8].ToString().Equals("LIMIT", StringComparison.OrdinalIgnoreCase) ? OrdType.LIMIT : OrdType.MARKET
-                            };
+                                order = new Order()
+                                {
+                                    OrderID = dataArray[2][0].ToString(),
+                                    ClientOrderID = (int)dataArray[2][2],
+                                    Time = new DateTime(1970, 1, 1).AddMilliseconds((double)dataArray[2][4]),
+                                    Volume = Math.Abs((double)dataArray[2][7]),
+                                    FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]),
+                                    Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
+                                    OrderType = dataArray[2][8].ToString().Equals("LIMIT", StringComparison.OrdinalIgnoreCase) ? OrdType.LIMIT : OrdType.MARKET
+                                };
+                                CurrentOrders.Add(order);
+                            }
+                            else
+                            {
+                                order.FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]);
+                                Log.Write($"Update {order}", 2);
+                            }
                         }
                     }
                     else if (msgType.Equals("tu"))  // trades
@@ -366,6 +388,10 @@ namespace Crux.BfxWS
                         else if (status.Equals("SUCCESS"))
                         {
                             Log.Write($"Notification: {dataArray[2][7].ToString()}", 2);
+                        }
+                        else if (status.Equals("INFO"))
+                        {
+                            Log.Write($"Information: {dataArray[2][7].ToString()}", 2);
                         }
                     }
                 }
@@ -446,6 +472,11 @@ namespace Crux.BfxWS
         private void SocketTerminal_OnClose(object sender, EventArgs e)
         {
             Log.Write("Bitfinex connection closed", 1);
+            var closedEvent = e as ClosedEventArgs;
+            if (closedEvent.Code > 1000)
+            {
+                SocketTerminal.Open();
+            }
         }
 
         private void SocketTerminal_OnOpen(object sender, EventArgs e)
