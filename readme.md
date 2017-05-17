@@ -43,4 +43,4 @@ The programm currently supports the following exchanges:
 ### Trading Algorithms/Strategies
 __Strategies must inherit from the TradeStrategy abstract class__
 
-Strategies are not included in the repository
+More details will be added to guide through trading strategy design and creation
