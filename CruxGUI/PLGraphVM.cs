@@ -38,23 +38,27 @@ namespace CruxGUI
         public PLGraphVM()
         {
             DataSeries = new SeriesCollection();
+            var strategyPLValue = new GearedValues<ObservablePoint>();
+            strategyPLValue.WithQuality(Quality.Highest);
             StrategyPL = new GLineSeries()
             {
                 Title = "Strategy P/L",
-                Values = new GearedValues<ObservablePoint>(),
+                Values = strategyPLValue,
                 Fill = Brushes.Transparent,
                 Stroke = Brushes.Blue,
                 StrokeThickness = 2,
-                PointGeometrySize = 6
+                PointGeometry = null
             };
+            var benchmarkPLValue = new GearedValues<ObservablePoint>();
+            benchmarkPLValue.WithQuality(Quality.Highest);
             BenchmarkPL = new GLineSeries()
             {
                 Title = "Benchmark P/L",
-                Values = new GearedValues<ObservablePoint>(),
+                Values = benchmarkPLValue,
                 Fill = Brushes.Transparent,
                 Stroke = Brushes.DarkGray,
                 StrokeThickness = 2,
-                PointGeometrySize = 6
+                PointGeometry = null
             };
 
             DataSeries.Add(StrategyPL);

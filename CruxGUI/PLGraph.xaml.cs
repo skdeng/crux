@@ -45,6 +45,9 @@ namespace CruxGUI
             {
                 AddPL(snapshot.CumulativePL, snapshot.BenchmarkCumulativePL, snapshot.Time);
             }
+
+            PLGraphModel.AxisStart = StrategyStatistics.Snapshots.Last().Time.AddHours(-24).Ticks;
+            PLGraphModel.AxisEnd = StrategyStatistics.Snapshots.Last().Time.AddHours(2).Ticks;
         }
 
         public void AddPL(double strategyPL, double benchmarkPL, DateTime time)
@@ -100,6 +103,12 @@ namespace CruxGUI
             {
                 Selected = chartPoint;
             }
+        }
+
+        private void ContextMenuCenter_Click(object sender, RoutedEventArgs e)
+        {
+            PLGraphModel.AxisStart = StrategyStatistics.Snapshots.Last().Time.AddHours(-24).Ticks;
+            PLGraphModel.AxisEnd = StrategyStatistics.Snapshots.Last().Time.AddHours(2).Ticks;
         }
     }
 }

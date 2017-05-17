@@ -18,8 +18,13 @@
         Margin="10"
         Zoom="X"
         TooltipTimeout="0"
-        DataClick="PLChart_DataClick"
-        >
+        DataClick="PLChart_DataClick">
+
+        <lvc:CartesianChart.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Center Graph" Click="ContextMenuCenter_Click"/>
+            </ContextMenu>
+        </lvc:CartesianChart.ContextMenu>
 
         <lvc:CartesianChart.AxisX>
             <lvc:Axis
