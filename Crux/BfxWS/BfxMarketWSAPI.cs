@@ -23,7 +23,7 @@ namespace Crux.BfxWS
 
         private string TradeSymbol;
 
-        private double BalanceFiat = 0;
+        private double BalanceFiat = -1;
 
         private double BalanceSecurity = 0;
 
@@ -114,6 +114,7 @@ namespace Crux.BfxWS
         public bool IsReady()
         {
             return LastTrade != null &&
+                   BalanceFiat >= 0 &&
                    CurrentOrderBook.BestBid != null &&
                    CurrentOrderBook.BestOffer != null;
         }
