@@ -17,6 +17,8 @@ namespace Crux.BfxWS
 
         private WebSocket SocketTerminal;
 
+        private bool ManualClose;
+
         private Dictionary<string, int> ChannelID;
 
         private string Symbol;
@@ -46,6 +48,8 @@ namespace Crux.BfxWS
             Symbol = symbol.ToUpper();
             TradeSymbol = $"t{Symbol}USD";
 
+            ManualClose = false;
+
             SocketTerminal = new WebSocket(ConnectionString);
             SocketTerminal.Opened += SocketTerminal_OnOpen;
             SocketTerminal.Closed += SocketTerminal_OnClose;
@@ -56,6 +60,7 @@ namespace Crux.BfxWS
 
         public void Close()
         {
+            ManualClose = true;
             SocketTerminal.Close();
             SocketTerminal.Dispose();
         }
@@ -468,8 +473,7 @@ namespace Crux.BfxWS
         private void SocketTerminal_OnClose(object sender, EventArgs e)
         {
             Log.Write("Bitfinex connection closed", 1);
-            var closedEvent = e as ClosedEventArgs;
-            if (closedEvent.Code > 1000)
+            if (!ManualClose)
             {
                 SocketTerminal.Open();
             }

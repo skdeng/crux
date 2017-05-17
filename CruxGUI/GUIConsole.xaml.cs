@@ -14,6 +14,8 @@ namespace CruxGUI
         private ConsoleContentVM ConsoleLog;
         private bool ConsoleScrollToBottom;
 
+        private int MaxLogSize = 500;
+
         public GUIConsole()
         {
             AllConsoleLogs = new ObservableCollection<ConsoleEntry>();
@@ -39,9 +41,17 @@ namespace CruxGUI
             App.Current?.Dispatcher.Invoke(delegate
             {
                 AllConsoleLogs.Add(new ConsoleEntry() { Text = msg, Color = color });
+                if (AllConsoleLogs.Count > MaxLogSize)
+                {
+                    AllConsoleLogs.RemoveAt(0);
+                }
                 if (msg.IndexOf(FilterTextBox.Text) >= 0)
                 {
                     ConsoleLog.ConsoleOutput.Add(new ConsoleEntry() { Text = msg, Color = color });
+                    if (ConsoleLog.ConsoleOutput.Count > MaxLogSize)
+                    {
+                        ConsoleLog.ConsoleOutput.RemoveAt(0);
+                    }
                 }
                 if (ConsoleScrollToBottom)
                 {
