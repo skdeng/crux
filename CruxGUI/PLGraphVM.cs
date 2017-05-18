@@ -1,6 +1,6 @@
 ﻿using LiveCharts;
 using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+using LiveCharts.Geared;
 using System;
 using System.Windows.Media;
 
@@ -10,9 +10,9 @@ namespace CruxGUI
     {
         public SeriesCollection DataSeries { get; set; }
 
-        public LineSeries StrategyPL { get; set; }
+        public GLineSeries StrategyPL { get; set; }
 
-        public LineSeries BenchmarkPL { get; set; }
+        public GLineSeries BenchmarkPL { get; set; }
 
         private double _AxisStart { get; set; }
         public double AxisStart
@@ -38,23 +38,27 @@ namespace CruxGUI
         public PLGraphVM()
         {
             DataSeries = new SeriesCollection();
-            StrategyPL = new LineSeries()
+            var strategyPLValue = new GearedValues<ObservablePoint>();
+            strategyPLValue.WithQuality(Quality.Highest);
+            StrategyPL = new GLineSeries()
             {
                 Title = "Strategy P/L",
-                Values = new ChartValues<ObservablePoint>(),
+                Values = strategyPLValue,
                 Fill = Brushes.Transparent,
                 Stroke = Brushes.Blue,
                 StrokeThickness = 2,
-                PointGeometrySize = 6
+                PointGeometry = null
             };
-            BenchmarkPL = new LineSeries()
+            var benchmarkPLValue = new GearedValues<ObservablePoint>();
+            benchmarkPLValue.WithQuality(Quality.Highest);
+            BenchmarkPL = new GLineSeries()
             {
                 Title = "Benchmark P/L",
-                Values = new ChartValues<ObservablePoint>(),
+                Values = benchmarkPLValue,
                 Fill = Brushes.Transparent,
                 Stroke = Brushes.DarkGray,
                 StrokeThickness = 2,
-                PointGeometrySize = 6
+                PointGeometry = null
             };
 
             DataSeries.Add(StrategyPL);

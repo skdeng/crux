@@ -17,13 +17,15 @@ namespace Crux.BfxWS
 
         private WebSocket SocketTerminal;
 
+        private bool ManualClose;
+
         private Dictionary<string, int> ChannelID;
 
         private string Symbol;
 
         private string TradeSymbol;
 
-        private double BalanceFiat = 0;
+        private double BalanceFiat = -1;
 
         private double BalanceSecurity = 0;
 
@@ -46,6 +48,8 @@ namespace Crux.BfxWS
             Symbol = symbol.ToUpper();
             TradeSymbol = $"t{Symbol}USD";
 
+            ManualClose = false;
+
             SocketTerminal = new WebSocket(ConnectionString);
             SocketTerminal.Opened += SocketTerminal_OnOpen;
             SocketTerminal.Closed += SocketTerminal_OnClose;
@@ -56,6 +60,7 @@ namespace Crux.BfxWS
 
         public void Close()
         {
+            ManualClose = true;
             SocketTerminal.Close();
             SocketTerminal.Dispose();
         }
@@ -69,11 +74,6 @@ namespace Crux.BfxWS
                 Log.Write($"Cancel group order msg: {cancelGroupOrderMsg}", 3);
                 SocketTerminal.Send(cancelGroupOrderMsg);
             }
-
-            //foreach (var order in CurrentOrders)
-            //{
-            //    CancelOrder(order);
-            //}
         }
 
         public void CancelOrder(Order order, OrderOperationCallback callback = null)
@@ -119,6 +119,7 @@ namespace Crux.BfxWS
         public bool IsReady()
         {
             return LastTrade != null &&
+                   BalanceFiat >= 0 &&
                    CurrentOrderBook.BestBid != null &&
                    CurrentOrderBook.BestOffer != null;
         }
@@ -472,8 +473,7 @@ namespace Crux.BfxWS
         private void SocketTerminal_OnClose(object sender, EventArgs e)
         {
             Log.Write("Bitfinex connection closed", 1);
-            var closedEvent = e as ClosedEventArgs;
-            if (closedEvent.Code > 1000)
+            if (!ManualClose)
             {
                 SocketTerminal.Open();
             }

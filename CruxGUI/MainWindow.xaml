@@ -116,7 +116,7 @@
                 Grid.Column="0"
                 Background="WhiteSmoke"/>
 
-            <GridSplitter Grid.Column="1" Grid.ColumnSpan="1" ResizeDirection="Columns" Height="Auto" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="1" Background="DarkGray"/>
+            <GridSplitter Grid.Column="1" Grid.ColumnSpan="1" ResizeDirection="Columns" Height="Auto" Width="2" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0.5" Background="DarkGray"/>
 
             <local:GUIConsole 
                 x:Name="GUIConsoleController" 
