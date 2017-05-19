@@ -116,11 +116,12 @@
                 Grid.Column="0"
                 Background="WhiteSmoke"/>
 
-            <GridSplitter Grid.Column="1" Grid.ColumnSpan="1" ResizeDirection="Columns" Height="Auto" Width="2" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0.5" Background="DarkGray"/>
+            <GridSplitter Grid.Column="1" Grid.ColumnSpan="1" ResizeDirection="Columns" Height="Auto" Width="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0.5" Background="DarkGray"/>
 
             <local:GUIConsole 
                 x:Name="GUIConsoleController" 
-                Grid.Column="2" />
+                Grid.Column="2"
+                Margin="5,0,0,0"/>
 
         </Grid>
 

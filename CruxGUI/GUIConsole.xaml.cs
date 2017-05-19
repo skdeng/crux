@@ -14,7 +14,7 @@ namespace CruxGUI
         private ConsoleContentVM ConsoleLog;
         private bool ConsoleScrollToBottom;
 
-        private int MaxLogSize = 500;
+        private int MaxLogSize = 10000;
 
         public GUIConsole()
         {

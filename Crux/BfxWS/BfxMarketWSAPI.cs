@@ -269,15 +269,29 @@ namespace Crux.BfxWS
                         string symbol = dataArray[2][3].ToString();
                         if (symbol.Equals(TradeSymbol))
                         {
+                            string status = dataArray[2][13].ToString();
                             string orderId = dataArray[2][0].ToString();
                             var order = CurrentOrders.FirstOrDefault(o => o.OrderID.Equals(orderId));
+
                             if (order != null)
                             {
-                                CurrentOrders.Remove(order);
-                                OrderCancelCallback?.Invoke(false);
-                                OrderCancelCallback = null;
-
-                                Log.Write($"Cancelled {order}", 2);
+                                if (status.Contains("EXECUTED")) // executed
+                                {
+                                    order.FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]);
+                                    Log.Write($"Executed {order}", 2);
+                                }
+                                else if (status.Contains("PARTIALLY FILLED"))
+                                {
+                                    order.FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]);
+                                    Log.Write($"Partial fill {order}", 2);
+                                }
+                                else // cancelled
+                                {
+                                    CurrentOrders.Remove(order);
+                                    OrderCancelCallback?.Invoke(false);
+                                    OrderCancelCallback = null;
+                                    Log.Write($"Cancelled {order}", 2);
+                                }
                             }
                             else
                             {
@@ -293,7 +307,15 @@ namespace Crux.BfxWS
                                     Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
                                     OrderType = dataArray[2][8].ToString().Contains("LIMIT") ? OrdType.LIMIT : OrdType.MARKET
                                 };
-                                Log.Write($"Cancelled {orderId}", 0);
+
+                                if (status.Contains("EXECUTED"))
+                                {
+                                    Log.Write($"Executed unregistered {orderId} (This should happen VERY rarily)", 2);
+                                }
+                                else
+                                {
+                                    Log.Write($"Cancelled unregistered {orderId}", 2);
+                                }
                             }
                         }
                     }
@@ -315,7 +337,7 @@ namespace Crux.BfxWS
                                     Volume = Math.Abs((double)order[7]),
                                     FilledVolume = Math.Abs((double)order[6] - (double)order[7]),
                                     Side = (double)order[6] > 0 ? Side.BUY : Side.SELL,
-                                    OrderType = order[8].ToString().Equals("LIMIT", StringComparison.OrdinalIgnoreCase) ? OrdType.LIMIT : OrdType.MARKET,
+                                    OrderType = order[8].ToString().Contains("LIMIT") ? OrdType.LIMIT : OrdType.MARKET,
                                     Time = new DateTime(1970, 1, 1).AddMilliseconds((double)order[4]),
                                 });
                             }
@@ -338,7 +360,7 @@ namespace Crux.BfxWS
                                     Volume = Math.Abs((double)dataArray[2][7]),
                                     FilledVolume = Math.Abs((double)dataArray[2][6] - (double)dataArray[2][7]),
                                     Side = (double)dataArray[2][6] > 0 ? Side.BUY : Side.SELL,
-                                    OrderType = dataArray[2][8].ToString().Equals("LIMIT", StringComparison.OrdinalIgnoreCase) ? OrdType.LIMIT : OrdType.MARKET
+                                    OrderType = dataArray[2][8].ToString().Contains("LIMIT") ? OrdType.LIMIT : OrdType.MARKET
                                 };
                                 CurrentOrders.Add(order);
                             }
@@ -359,6 +381,11 @@ namespace Crux.BfxWS
                             if (order != null)
                             {
                                 order.FilledVolume = (double)dataArray[2][4];
+                                Log.Write($"Trade info about {order}", 2);
+                                if (order.FilledVolume >= order.Volume)
+                                {
+                                    CurrentOrders.Remove(order);
+                                }
                             }
                             else
                             {
@@ -475,6 +502,11 @@ namespace Crux.BfxWS
             Log.Write("Bitfinex connection closed", 1);
             if (!ManualClose)
             {
+                SocketTerminal = new WebSocket(ConnectionString);
+                SocketTerminal.Opened += SocketTerminal_OnOpen;
+                SocketTerminal.Closed += SocketTerminal_OnClose;
+                SocketTerminal.Error += SocketTerminal_OnError;
+                SocketTerminal.MessageReceived += SocketTerminal_OnMessageReceived;
                 SocketTerminal.Open();
             }
         }
