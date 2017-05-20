@@ -27,7 +27,7 @@ walbtc = []
 class kalman():
 	def __init__(self):
 		self.p = 1.0
-		self.q = 1e-7
+		self.q = 0.000001
 		self.r = 0.01
 		self.x = 0.0
 
