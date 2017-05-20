@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{24A200FB-BB20-4138-867C-1570F7606133}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Crux</RootNamespace>
     <AssemblyName>Crux</AssemblyName>
@@ -52,8 +52,7 @@
     </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
+    <StartupObject>Crux.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -116,6 +115,7 @@
     <Compile Include="BasicStrategy\AbsoluteMeanReversalStrategy.cs" />
     <Compile Include="BasicStrategy\MarketMaker.cs" />
     <Compile Include="BasicStrategy\ModifiedMR.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="Candle.cs" />
     <Compile Include="Extend.cs" />

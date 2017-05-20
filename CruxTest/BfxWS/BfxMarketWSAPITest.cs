@@ -56,5 +56,16 @@ namespace CruxTest.BfxWS
             api.Close();
             Thread.Sleep(500);
         }
+
+        [TestMethod]
+        public void AddCancelOrders()
+        {
+            BfxMarketWSAPI api = new BfxMarketWSAPI("../../../Keys/bfx.txt", "BTC");
+            while (!api.IsReady()) ;
+
+            var order = api.SubmitOrder(1000, 0.01, Side.BUY, OrdType.LIMIT);
+            Thread.Sleep(2000);
+            api.CancelOrder(order);
+        }
     }
 }

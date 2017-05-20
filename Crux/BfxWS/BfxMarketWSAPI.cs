@@ -88,7 +88,7 @@ namespace Crux.BfxWS
         {
             if (queryOrder != null)
             {
-                return CurrentOrders.Where(o => o.Equals(queryOrder)).ToList();
+                return CurrentOrders.Where(o => o.ClientOrderID == queryOrder.ClientOrderID).ToList();
             }
             else
             {
@@ -380,7 +380,7 @@ namespace Crux.BfxWS
                             var order = CurrentOrders.FirstOrDefault(o => o.OrderID.Equals(orderId));
                             if (order != null)
                             {
-                                order.FilledVolume = (double)dataArray[2][4];
+                                order.FilledVolume = Math.Abs((double)dataArray[2][4]);
                                 Log.Write($"Trade info about {order}", 2);
                                 if (order.FilledVolume >= order.Volume)
                                 {
